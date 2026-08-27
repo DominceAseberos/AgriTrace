@@ -7,7 +7,7 @@ AgriTrace is a focused take-home project for **agarwood plantations**, specifica
 **Repository:** https://github.com/DominceAseberos/AgriTrace  
 **Vercel production deployment:** https://agritrace-xi.vercel.app
 
-> The production build is deployed successfully. Before reviewer use, configure `COGNODB_URI`, `COGNODB_USERNAME`, and `COGNODB_PASSWORD` in the Vercel project environment and redeploy so the hosted app can reach CognoDB.
+> The production deployment is live and connected to CognoDB. The public `/api/health` endpoint has been verified with `200 {"ok":true,"database":"reachable"}`.
 
 The central workflow is **Check Related Trees**: select an affected agarwood tree, then review related trees through shared symptoms, physical proximity, treatment history, and cross-area worker-recording paths.
 
