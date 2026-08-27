@@ -43,13 +43,67 @@ export function NotFoundState({ title = "Plant not found" }: { title?: string })
   );
 }
 
-export function LoadingPanel({ label = "Tracing plant relationships…" }: { label?: string }) {
+function SkeletonBlock({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-md bg-slate-200/80 ${className}`} aria-hidden="true" />;
+}
+
+export function LoadingPanel({ label = "Loading plant data…" }: { label?: string }) {
   return (
-    <div className="grid min-h-[45vh] place-items-center">
-      <div className="text-center">
-        <div className="mx-auto size-9 animate-spin rounded-full border-2 border-black/10 border-t-[var(--forest)]" />
-        <p className="mt-4 text-sm font-medium text-black/50">{label}</p>
+    <section className="space-y-5" aria-busy="true" aria-live="polite" aria-label={label}>
+      <span className="sr-only">{label}</span>
+
+      <div className="admin-card p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-5">
+          <div className="min-w-0 flex-1">
+            <SkeletonBlock className="h-3 w-28" />
+            <SkeletonBlock className="mt-3 h-8 w-64 max-w-full" />
+            <SkeletonBlock className="mt-3 h-4 w-full max-w-xl" />
+          </div>
+          <div className="grid w-full grid-cols-3 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 sm:w-[300px]">
+            {[0, 1, 2].map((item) => (
+              <div key={item} className="bg-white p-4">
+                <SkeletonBlock className="mx-auto h-7 w-10" />
+                <SkeletonBlock className="mx-auto mt-2 h-2.5 w-14" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[0, 1, 2, 3].map((item) => (
+          <div key={item} className="admin-card flex items-center gap-4 p-4">
+            <SkeletonBlock className="size-10 shrink-0" />
+            <div className="flex-1">
+              <SkeletonBlock className="h-6 w-10" />
+              <SkeletonBlock className="mt-2 h-3 w-24" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="admin-card overflow-hidden">
+        <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
+          <SkeletonBlock className="h-3 w-24" />
+          <SkeletonBlock className="mt-2 h-6 w-52" />
+        </div>
+        <div className="divide-y divide-slate-100">
+          {[0, 1, 2, 3].map((item) => (
+            <div key={item} className="grid gap-4 px-5 py-4 sm:px-6 lg:grid-cols-[44px_0.8fr_1.3fr_auto] lg:items-center">
+              <SkeletonBlock className="size-8" />
+              <div>
+                <SkeletonBlock className="h-4 w-20" />
+                <SkeletonBlock className="mt-2 h-3 w-28" />
+              </div>
+              <div className="flex gap-2">
+                <SkeletonBlock className="h-7 w-24" />
+                <SkeletonBlock className="h-7 w-28" />
+              </div>
+              <SkeletonBlock className="h-4 w-16" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

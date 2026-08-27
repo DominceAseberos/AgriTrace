@@ -302,7 +302,7 @@ export async function getInvestigation(plantId: string): Promise<DataResult<Inve
       }
     };
 
-    for (const item of relatedCases.slice(0, 9)) {
+    for (const item of relatedCases.slice(0, 5)) {
       pushNode({ id: item.plant.id, label: item.plant.code, kind: "plant", meta: item.plant.gridName });
       for (const reason of item.reasons) {
         if (reason.type === "near") {
