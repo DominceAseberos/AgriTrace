@@ -4,7 +4,7 @@ import { SiteShell } from "@/components/site-shell";
 
 export const metadata: Metadata = {
   title: { default: "AgriTrace", template: "%s · AgriTrace" },
-  description: "Graph-based plant health investigation powered by CognoDB.",
+  description: "Agarwood tree health monitoring and related-case investigation powered by CognoDB.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

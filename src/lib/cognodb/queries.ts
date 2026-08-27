@@ -54,6 +54,7 @@ export const QUERIES = {
       OR toLower(p.species) CONTAINS toLower($query)
       OR toLower(g.name) CONTAINS toLower($query))
       AND ($status = '' OR p.status = $status)
+      AND ($species = '' OR p.species = $species)
     RETURN
       p.id AS id,
       p.code AS code,

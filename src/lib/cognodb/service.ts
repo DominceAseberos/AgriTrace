@@ -55,7 +55,7 @@ async function safely<T>(work: () => Promise<T>): Promise<DataResult<T>> {
     if (error instanceof DatabaseUnavailableError) {
       return { ok: false, error: { code: "DB_UNAVAILABLE", message: error.message } };
     }
-    return { ok: false, error: { code: "UNKNOWN", message: "Something went wrong while reading the plant graph." } };
+    return { ok: false, error: { code: "UNKNOWN", message: "We couldn't load the latest agarwood records." } };
   }
 }
 
@@ -107,12 +107,13 @@ export async function getDashboardData(): Promise<DataResult<DashboardData>> {
   );
 }
 
-export async function getPlants(options: { query?: string; status?: string; limit?: number } = {}): Promise<DataResult<PlantSummary[]>> {
+export async function getPlants(options: { query?: string; status?: string; species?: string; limit?: number } = {}): Promise<DataResult<PlantSummary[]>> {
   return safely(async () =>
     withReadSession(async (session) => {
       const result = await session.run(QUERIES.listPlants, {
         query: options.query?.trim() ?? "",
         status: options.status === "healthy" || options.status === "watch" || options.status === "critical" ? options.status : "",
+        species: options.species === "Aquilaria malaccensis" || options.species === "Aquilaria crassna" ? options.species : "",
         limit: options.limit ?? 200,
       });
       return result.records.map(plantFromRecord);
@@ -159,13 +160,13 @@ async function readPlantDetail(plantId: string): Promise<PlantDetail | null> {
 export async function getPlantDetail(plantId: string): Promise<DataResult<PlantDetail>> {
   try {
     const plant = await readPlantDetail(plantId);
-    if (!plant) return { ok: false, error: { code: "NOT_FOUND", message: "Plant not found." } };
+    if (!plant) return { ok: false, error: { code: "NOT_FOUND", message: "Tree not found." } };
     return { ok: true, data: plant };
   } catch (error) {
     if (error instanceof DatabaseUnavailableError) {
       return { ok: false, error: { code: "DB_UNAVAILABLE", message: error.message } };
     }
-    return { ok: false, error: { code: "UNKNOWN", message: "Something went wrong while reading this plant." } };
+    return { ok: false, error: { code: "UNKNOWN", message: "We couldn't load this agarwood tree." } };
   }
 }
 
@@ -221,7 +222,7 @@ export async function getInvestigation(plantId: string): Promise<DataResult<Inve
       addReason(id, {
         type: "symptom",
         label: text(record, "symptomName"),
-        detail: `Both plants have observations showing ${text(record, "symptomName")}.`,
+        detail: `Both trees have inspections showing ${text(record, "symptomName")}.`,
         weight: 3,
       }, {
         id,
@@ -240,8 +241,8 @@ export async function getInvestigation(plantId: string): Promise<DataResult<Inve
       const id = text(record, "id");
       addReason(id, {
         type: "near",
-        label: "Nearby plant",
-        detail: `Direct NEAR relationship inside ${text(record, "gridName")}.`,
+        label: "Nearby tree",
+        detail: `The trees are recorded as nearby in ${text(record, "gridName")}.`,
         weight: 3,
       }, plantFromRecord(record));
     }
@@ -251,7 +252,7 @@ export async function getInvestigation(plantId: string): Promise<DataResult<Inve
       addReason(id, {
         type: "treatment",
         label: text(record, "treatmentName"),
-        detail: `Both plants received ${text(record, "treatmentName")}.`,
+        detail: `Both trees received ${text(record, "treatmentName")}.`,
         weight: 2,
       }, plantFromRecord(record));
     }

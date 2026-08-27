@@ -47,8 +47,8 @@ export function buildSeedData(): SeedBundle {
   const workers: SeedNode[] = [
     { id: "worker-1", name: "Mara Santos", role: "Field Technician", agriTraceSeed: true },
     { id: "worker-2", name: "Joel Ramirez", role: "Field Technician", agriTraceSeed: true },
-    { id: "worker-3", name: "Ana Villareal", role: "Plant Health Scout", agriTraceSeed: true },
-    { id: "worker-4", name: "Carlo Mendoza", role: "Plant Health Scout", agriTraceSeed: true },
+    { id: "worker-3", name: "Ana Villareal", role: "Tree Health Scout", agriTraceSeed: true },
+    { id: "worker-4", name: "Carlo Mendoza", role: "Tree Health Scout", agriTraceSeed: true },
     { id: "worker-5", name: "Leah Garcia", role: "Farm Supervisor", agriTraceSeed: true },
     { id: "worker-6", name: "Noel Dizon", role: "Field Technician", agriTraceSeed: true },
     { id: "worker-7", name: "Ivy Flores", role: "Agriculture Aide", agriTraceSeed: true },
@@ -101,7 +101,7 @@ export function buildSeedData(): SeedBundle {
   for (let plantNumber = 1; plantNumber <= 72; plantNumber += 1) {
     const gridIndex = Math.floor((plantNumber - 1) / 12);
     const grid = grids[gridIndex];
-    const code = `PL-${pad(plantNumber)}`;
+    const code = `AG-${pad(plantNumber)}`;
     const plantId = `plant-${pad(plantNumber)}`;
     const isCritical = plantNumber % 11 === 0 || plantNumber === 34 || plantNumber === 58;
     const isWatch = !isCritical && (plantNumber % 5 === 0 || plantNumber % 7 === 0 || plantNumber === 18);
@@ -140,8 +140,8 @@ export function buildSeedData(): SeedBundle {
         notes: plantStatus === "healthy"
           ? "Routine inspection; canopy and stem condition normal."
           : observationIndex === 0
-            ? "Field scout flagged a visible health change for follow-up."
-            : "Follow-up inspection recorded the plant response after intervention.",
+            ? "Field staff noticed a visible health change and marked the tree for follow-up."
+            : "Follow-up inspection recorded how the tree responded after treatment.",
         agriTraceSeed: true,
       });
       hasObservation.push({ plantId, observationId });

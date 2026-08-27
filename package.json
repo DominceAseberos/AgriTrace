@@ -2,7 +2,7 @@
   "name": "agritrace",
   "version": "1.0.0",
   "private": true,
-  "description": "Graph-first plant health investigation built with Next.js and CognoDB.",
+  "description": "Agarwood tree health investigation built with Next.js and CognoDB.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,7 +12,8 @@
     "seed": "tsx scripts/seed.ts",
     "db:health": "tsx scripts/health.ts",
     "db:smoke": "tsx scripts/smoke.ts",
-    "capture": "tsx scripts/capture.ts"
+    "capture": "tsx scripts/capture.ts",
+    "ux:audit": "tsx scripts/ux-audit.ts"
   },
   "dependencies": {
     "@xyflow/react": "^12.9.2",

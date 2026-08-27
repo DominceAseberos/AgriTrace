@@ -37,22 +37,40 @@ async function main() {
   try {
     await waitForServer();
     const browser = await chromium.launch({ executablePath: chromePath, headless: true });
-    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
 
-    const captures = [
+    const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+    const desktopCaptures = [
       { route: "/", file: "dashboard.png" },
       { route: "/plants", file: "plants.png" },
       { route: "/plants/plant-011", file: "plant-detail.png" },
       { route: "/investigate/plant-011", file: "investigation.png" },
     ];
 
-    for (const capture of captures) {
-      await page.goto(`${baseUrl}${capture.route}`, { waitUntil: "networkidle" });
-      await page.screenshot({ path: path.join(outputDir, capture.file), fullPage: true });
+    for (const capture of desktopCaptures) {
+      await desktop.goto(`${baseUrl}${capture.route}`, { waitUntil: "networkidle" });
+      await desktop.screenshot({ path: path.join(outputDir, capture.file), fullPage: true });
+    }
+
+    await desktop.goto(`${baseUrl}/investigate/plant-011`, { waitUntil: "networkidle" });
+    await desktop.getByText("Show connection map", { exact: true }).click();
+    await desktop.waitForTimeout(400);
+    await desktop.screenshot({ path: path.join(outputDir, "investigation-map.png"), fullPage: true });
+
+    const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+    const mobileCaptures = [
+      { route: "/", file: "dashboard-mobile.png" },
+      { route: "/plants", file: "plants-mobile.png" },
+      { route: "/plants/plant-011", file: "plant-detail-mobile.png" },
+      { route: "/investigate/plant-011", file: "investigation-mobile.png" },
+    ];
+
+    for (const capture of mobileCaptures) {
+      await mobile.goto(`${baseUrl}${capture.route}`, { waitUntil: "networkidle" });
+      await mobile.screenshot({ path: path.join(outputDir, capture.file), fullPage: true });
     }
 
     await browser.close();
-    console.log(`Captured ${captures.length} UI screenshots.`);
+    console.log(`Captured ${desktopCaptures.length + mobileCaptures.length + 1} UI screenshots.`);
   } finally {
     if (server.pid) {
       try {

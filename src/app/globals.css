@@ -2,51 +2,55 @@
 @import "@xyflow/react/dist/style.css";
 
 :root {
-  --paper: #f4f6f8;
-  --ink: #1f2933;
-  --forest: #214b32;
-  --moss: #5f8158;
-  --lime: #9bc17a;
-  --clay: #bb7659;
-  --sun: #d8ae53;
-  --line: #dde3e7;
+  --paper: #f6f8fa;
+  --ink: #1f2937;
+  --accent: #2f6f78;
+  --accent-strong: #245d65;
+  --accent-soft: #eaf3f5;
+  --line: #e2e8f0;
   --panel: #ffffff;
 }
 
 * { box-sizing: border-box; }
-html { background: var(--paper); scroll-behavior: smooth; }
+html { background: var(--paper); scroll-behavior: smooth; font-size: 16px; }
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
-::selection { background: #c9ddb6; color: #17251d; }
+::selection { background: #d8edf0; color: #173b42; }
 a { text-decoration: none; }
 button, input, select { font: inherit; }
+input, select, button { min-height: 2.75rem; }
 
 .eyebrow {
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: #8a98a3;
+  color: #64748b;
 }
 
 .display {
   font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1;
-  letter-spacing: -0.045em;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
   font-weight: 650;
 }
 
-.admin-card {
+.admin-card,
+.info-box,
+.soft-panel {
   background: #fff;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(25, 38, 31, 0.035);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.025);
 }
 
 .admin-card-header {
@@ -54,19 +58,11 @@ button, input, select { font: inherit; }
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 54px;
-  padding: 0.9rem 1rem;
+  min-height: 58px;
+  padding: 1rem 1.125rem;
   border-bottom: 1px solid var(--line);
 }
 
-.info-box {
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(25, 38, 31, 0.03);
-}
-
-.soft-panel { background: #fff; border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(25,38,31,.03); }
 .metric-rule > * + * { border-left: 1px solid var(--line); }
 
 @media (max-width: 767px) {
@@ -75,13 +71,17 @@ button, input, select { font: inherit; }
 
 .react-flow__attribution { display: none; }
 .react-flow__controls {
-  border: 1px solid #d9e0e3 !important;
+  border: 1px solid #dbe3e8 !important;
   overflow: hidden;
   border-radius: 10px !important;
-  box-shadow: 0 8px 25px rgba(15, 28, 18, 0.08) !important;
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.07) !important;
 }
-.react-flow__controls-button { border: 0 !important; border-bottom: 1px solid #e7ebed !important; background: rgba(255,255,255,0.96) !important; }
-.react-flow__edge-text { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; }
+.react-flow__controls-button {
+  border: 0 !important;
+  border-bottom: 1px solid #e8edf1 !important;
+  background: rgba(255,255,255,0.98) !important;
+}
+.react-flow__edge-text { font-size: 11px; font-weight: 700; letter-spacing: 0.02em; }
 
 @keyframes float-in {
   from { opacity: 0; transform: translateY(8px); }
