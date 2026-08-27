@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, CalendarDays, ClipboardCheck, MapPin, Trees } from "lucide-react";
 import { DatabaseErrorState, NotFoundState } from "@/components/state-panels";
 import { StatusPill } from "@/components/status-pill";
+import { TreeContextFlow } from "@/components/tree-context-flow";
 import { getPlantDetail } from "@/lib/cognodb/service";
 import { formatDate } from "@/lib/utils";
 
@@ -53,6 +54,8 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
           </p>
         </div>
       </section>
+
+      <TreeContextFlow tree={plant} />
 
       <section className="grid gap-4 md:grid-cols-3">
         <div className="info-box p-5">

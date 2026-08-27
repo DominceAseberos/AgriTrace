@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -8,7 +9,6 @@ import {
   ChevronRight,
   Github,
   Home,
-  Leaf,
   Menu,
   PanelLeftClose,
   Trees,
@@ -42,9 +42,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     )}>
       <div className="flex h-[70px] items-center border-b border-slate-200 px-4">
         <Link href="/" className="flex min-w-0 items-center gap-3" onClick={() => setMobileOpen(false)}>
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e7f2f4] text-[#2f6f78]">
-            <Leaf className="size-5" strokeWidth={2} />
-          </span>
+          <Image src="/agritrace-mark.svg" alt="" width={40} height={40} className="size-10 shrink-0" priority />
           {!collapsed && (
             <span className="min-w-0">
               <span className="block truncate text-base font-semibold tracking-[-0.02em] text-slate-900">AgriTrace</span>
