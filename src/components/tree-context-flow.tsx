@@ -37,7 +37,7 @@ export function TreeContextFlow({ tree }: { tree: PlantDetail }) {
       <div className="admin-card-header">
         <div>
           <h2 id="tree-context-heading" className="text-base font-semibold text-slate-900">Where this tree fits</h2>
-          <p className="mt-1 text-[13px] text-slate-500">A quick path from the farm down to this tree&apos;s latest field evidence</p>
+          <p className="mt-1 text-[13px] text-slate-500">Farm → growing area → tree → latest field record</p>
         </div>
       </div>
 
@@ -52,17 +52,14 @@ export function TreeContextFlow({ tree }: { tree: PlantDetail }) {
           <Step icon={CalendarCheck} label="Latest inspection" value={latestInspection ? `${formatDate(latestInspection.observedAt)} · ${latestInspection.workerName}` : "No inspection recorded"} />
         </div>
 
-        <div className="relative mt-4 border-t border-slate-200 pt-4 md:ml-[50%]">
-          <div className="absolute -top-3 left-1/2 hidden h-3 border-l border-slate-300 md:block" />
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <div className="flex items-center gap-2 text-[13px] font-medium text-amber-800"><Stethoscope className="size-4" /> What was noticed</div>
-              <p className="mt-2 text-[15px] font-semibold leading-6 text-slate-900">{symptomText}</p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center gap-2 text-[13px] font-medium text-slate-600"><CalendarCheck className="size-4" /> Latest treatment</div>
-              <p className="mt-2 text-[15px] font-semibold leading-6 text-slate-900">{treatmentText}</p>
-            </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center gap-2 text-[13px] font-medium text-amber-800"><Stethoscope className="size-4" /> What was noticed</div>
+            <p className="mt-2 text-[15px] font-semibold leading-6 text-slate-900">{symptomText}</p>
+          </div>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+            <div className="flex items-center gap-2 text-[13px] font-medium text-emerald-800"><CalendarCheck className="size-4" /> Latest treatment</div>
+            <p className="mt-2 text-[15px] font-semibold leading-6 text-slate-900">{treatmentText}</p>
           </div>
         </div>
       </div>
