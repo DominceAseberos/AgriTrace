@@ -4,6 +4,11 @@
 
 AgriTrace is a focused take-home project derived from an agricultural monitoring domain. Instead of treating each plant as an isolated row, it models the relationships between plants, observations, symptoms, treatments, workers, grids, and companies so a supervisor can investigate **why multiple plant cases may be connected**.
 
+**Repository:** https://github.com/DominceAseberos/AgriTrace  
+**Vercel production deployment:** https://agritrace-xi.vercel.app
+
+> The production build is deployed successfully. Before reviewer use, configure `COGNODB_URI`, `COGNODB_USERNAME`, and `COGNODB_PASSWORD` in the Vercel project environment and redeploy so the hosted app can reach CognoDB.
+
 The central workflow is **Trace Related Cases**: select an affected plant, then explore related plants through shared symptoms, physical proximity, treatment history, and cross-grid worker-recording paths.
 
 ## Screenshots
@@ -433,7 +438,7 @@ A short reviewer flow:
 - [ ] Hosted demo URL
 - [ ] Short screen recording
 
-The hosted demo URL will be added after Vercel deployment. The screen recording is the remaining manual submission artifact.
+A production Vercel deployment exists at `https://agritrace-xi.vercel.app`, but the hosted-demo checkbox remains open until the CognoDB environment variables are configured in Vercel and the live database flow is re-verified. The short screen recording is the other remaining manual submission artifact.
 
 ## Security notes
 
