@@ -62,6 +62,18 @@ async function main() {
       await page.close();
     }
 
+    const rowPage = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    await rowPage.goto(baseUrl, { waitUntil: "networkidle" });
+    const dashboardRow = rowPage.locator('tbody tr[role="link"]').first();
+    await dashboardRow.click({ position: { x: 420, y: 24 } });
+    await rowPage.waitForURL(/\/plants\/plant-/);
+
+    await rowPage.goto(`${baseUrl}/plants`, { waitUntil: "networkidle" });
+    const treeListRow = rowPage.locator('tbody tr[role="link"]').first();
+    await treeListRow.click({ position: { x: 520, y: 24 } });
+    await rowPage.waitForURL(/\/plants\/plant-/);
+    await rowPage.close();
+
     const graphPage = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await graphPage.goto(`${baseUrl}/investigate/plant-011`, { waitUntil: "networkidle" });
     await graphPage.getByText("Show connection map", { exact: true }).click();

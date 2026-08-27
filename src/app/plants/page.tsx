@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Filter, Search } from "lucide-react";
+import { ClickableTableRow } from "@/components/clickable-table-row";
 import { DatabaseErrorState, EmptyState } from "@/components/state-panels";
 import { StatusPill } from "@/components/status-pill";
 import { getPlants } from "@/lib/cognodb/service";
@@ -90,15 +91,15 @@ export default async function PlantsPage({ searchParams }: { searchParams: Searc
               </thead>
               <tbody className="divide-y divide-slate-100 text-[14px]">
                 {result.data.map((plant) => (
-                  <tr key={plant.id} className="transition hover:bg-slate-50/80">
-                    <td className="px-5 py-4"><Link href={`/plants/${plant.id}`} className="font-semibold text-slate-900 hover:text-[#2f6f78]">{plant.code}</Link></td>
+                  <ClickableTableRow key={plant.id} href={`/plants/${plant.id}`} label={`Open ${plant.code} tree record`}>
+                    <td className="px-5 py-4 font-semibold text-slate-900">{plant.code}</td>
                     <td className="px-5 py-4 italic text-slate-600">{plant.species}</td>
                     <td className="px-5 py-4"><StatusPill status={plant.status} /></td>
                     <td className="px-5 py-4 text-slate-700">{plant.gridName}</td>
                     <td className="max-w-[260px] px-5 py-4 text-slate-600">{plant.symptoms.length ? plant.symptoms.join(", ") : "None recorded"}</td>
                     <td className="px-5 py-4 text-slate-500">{formatDate(plant.latestObservedAt)}</td>
-                    <td className="px-5 py-4"><ArrowUpRight className="size-4 text-slate-400" /></td>
-                  </tr>
+                    <td className="px-5 py-4"><ArrowUpRight className="size-4 text-slate-400" aria-hidden="true" /></td>
+                  </ClickableTableRow>
                 ))}
               </tbody>
             </table>

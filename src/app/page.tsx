@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CircleAlert, HeartPulse, Trees, TrendingUp } from "lucide-react";
+import { ClickableTableRow } from "@/components/clickable-table-row";
 import { DatabaseErrorState, EmptyState } from "@/components/state-panels";
 import { StatusPill } from "@/components/status-pill";
 import { getDashboardData } from "@/lib/cognodb/service";
@@ -90,14 +91,18 @@ export default async function DashboardPage() {
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-[14px]">
                     {recentCases.map((item) => (
-                      <tr key={`${item.plantId}-${item.observedAt}`} className="transition hover:bg-slate-50/80">
-                        <td className="px-5 py-4"><Link href={`/plants/${item.plantId}`} className="font-semibold text-slate-900 hover:text-[#2f6f78]">{item.plantCode}</Link></td>
+                      <ClickableTableRow
+                        key={`${item.plantId}-${item.observedAt}`}
+                        href={`/plants/${item.plantId}`}
+                        label={`Open ${item.plantCode} tree record`}
+                      >
+                        <td className="px-5 py-4 font-semibold text-slate-900">{item.plantCode}</td>
                         <td className="px-5 py-4"><StatusPill status={item.status} /></td>
                         <td className="px-5 py-4 text-slate-700">{item.gridName}</td>
                         <td className="max-w-[280px] px-5 py-4 text-slate-600">{item.symptoms.join(", ") || "No symptom recorded"}</td>
                         <td className="px-5 py-4 text-slate-500">{formatDate(item.observedAt)}</td>
-                        <td className="px-5 py-4"><Link href={`/plants/${item.plantId}`} aria-label={`Open ${item.plantCode}`}><ArrowRight className="size-4 text-slate-400" /></Link></td>
-                      </tr>
+                        <td className="px-5 py-4"><ArrowRight className="size-4 text-slate-400" aria-hidden="true" /></td>
+                      </ClickableTableRow>
                     ))}
                   </tbody>
                 </table>
