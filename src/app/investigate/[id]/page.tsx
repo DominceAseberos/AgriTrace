@@ -98,6 +98,17 @@ export default async function InvestigationPage({ params }: { params: Promise<{ 
         <EmptyState title="No related trees found" message="There are no other recorded agarwood trees with the same symptoms, nearby location, treatment history, or field-worker pattern." />
       ) : (
         <>
+          <details className="admin-card group overflow-hidden">
+            <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 sm:px-6">
+              <div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-lg bg-slate-100 text-slate-600"><Network className="size-4" /></span><div><p className="text-[15px] font-semibold text-slate-900">Show connection map</p><p className="mt-0.5 text-[13px] text-slate-500">Optional visual view of the top related trees</p></div></div>
+              <ChevronDown className="size-5 text-slate-400 transition group-open:rotate-180" />
+            </summary>
+            <div className="border-t border-slate-200 p-4 sm:p-5">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><p className="text-[14px] font-medium text-slate-600">Selected tree → reason → related tree</p><span className="text-[13px] text-slate-500">Drag or zoom if needed</span></div>
+              <InvestigationGraph graph={graph} />
+            </div>
+          </details>
+
           <section>
             <div className="mb-3"><h2 className="text-xl font-semibold text-slate-900">Why are these trees related?</h2><p className="mt-1 text-[14px] text-slate-500">Each number shows how many related trees share that kind of evidence.</p></div>
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -137,17 +148,6 @@ export default async function InvestigationPage({ params }: { params: Promise<{ 
               ))}
             </div>
           </section>
-
-          <details className="admin-card group overflow-hidden">
-            <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 sm:px-6">
-              <div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-lg bg-slate-100 text-slate-600"><Network className="size-4" /></span><div><p className="text-[15px] font-semibold text-slate-900">Show connection map</p><p className="mt-0.5 text-[13px] text-slate-500">Optional visual view of the top related trees</p></div></div>
-              <ChevronDown className="size-5 text-slate-400 transition group-open:rotate-180" />
-            </summary>
-            <div className="border-t border-slate-200 p-4 sm:p-5">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><p className="text-[14px] font-medium text-slate-600">Selected tree → reason → related tree</p><span className="text-[13px] text-slate-500">Drag or zoom if needed</span></div>
-              <InvestigationGraph graph={graph} />
-            </div>
-          </details>
 
           <section className="admin-card overflow-hidden">
             <div className="admin-card-header"><div><h2 className="text-base font-semibold text-slate-900">Same symptom seen in another area</h2><p className="mt-1 text-[13px] text-slate-500">Cases where the same field worker recorded the same symptom elsewhere.</p></div></div>
