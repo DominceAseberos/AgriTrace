@@ -1,57 +1,70 @@
 # AgriTrace
 
-**Graph-backed agarwood tree health investigation built with Next.js and CognoDB.**
+**AgriTrace is a graph-backed agarwood tree health investigation application built with Next.js and CognoDB.**
 
-AgriTrace is a focused take-home project for **agarwood plantations**, specifically `Aquilaria malaccensis` and `Aquilaria crassna`. Instead of treating each tree as an isolated row, it models relationships between agarwood trees, inspections, symptoms, treatments, workers, growing areas, and farms so a supervisor can investigate **why multiple tree cases may be connected**.
+It focuses on agarwood plantations containing `Aquilaria malaccensis` and `Aquilaria crassna` trees. The application connects tree records with inspections, symptoms, treatments, field workers, growing areas, and farms so related health cases can be investigated as connected evidence rather than isolated records.
 
-**Repository:** https://github.com/DominceAseberos/AgriTrace  
-**Vercel production deployment:** https://agritrace-xi.vercel.app
+**Live demo:** https://agritrace-xi.vercel.app
+**Repository:** https://github.com/DominceAseberos/AgriTrace
 
-> The production deployment is live and connected to CognoDB. The public `/api/health` endpoint has been verified with `200 {"ok":true,"database":"reachable"}`.
+## What AgriTrace does
 
-The central workflow is **Check Related Trees**: select an affected agarwood tree, then review related trees through shared symptoms, physical proximity, treatment history, and cross-area worker-recording paths.
+AgriTrace helps identify which agarwood trees may be related to one another and why.
+
+A user can:
+
+- review the overall health of the plantation
+- browse and filter agarwood trees by species, growing area, and health status
+- open a tree record and review inspections, symptoms, and treatment history
+- see where a tree fits in the plantation hierarchy
+- check related trees based on shared symptoms, nearby location, shared treatments, or shared field-worker observations
+- inspect the connection map between a selected tree and the strongest related cases
+- compare treatment outcomes across connected tree records
+
+The central workflow is **Check Related Trees**.
 
 ## Screenshots
 
-### Dashboard
+### Overview
 
-![AgriTrace dashboard](docs/screenshots/dashboard.png)
+![AgriTrace overview](docs/screenshots/dashboard.png)
 
-### Agarwood tree list
+### Agarwood trees
 
-![AgriTrace plant explorer](docs/screenshots/plants.png)
+![AgriTrace tree records](docs/screenshots/plants.png)
 
-### Agarwood tree detail
+### Tree details
 
-![AgriTrace plant detail](docs/screenshots/plant-detail.png)
+![AgriTrace tree detail](docs/screenshots/plant-detail.png)
 
-### Related-tree investigation
+### Related trees
 
 ![AgriTrace related-tree investigation](docs/screenshots/investigation.png)
 
-### Responsive mobile views
+### Connection map
 
-| Overview | Tree list | Tree details | Related trees |
-| --- | --- | --- | --- |
-| ![Mobile overview](docs/screenshots/dashboard-mobile.png) | ![Mobile tree list](docs/screenshots/plants-mobile.png) | ![Mobile tree detail](docs/screenshots/plant-detail-mobile.png) | ![Mobile related trees](docs/screenshots/investigation-mobile.png) |
-
-The optional connection map is also captured separately in `docs/screenshots/investigation-map.png`.
+![AgriTrace connection map](docs/screenshots/investigation-map.png)
 
 ## Why a graph database?
 
-The interesting questions in AgriTrace are not about a single agarwood tree record. They are about **paths across connected evidence**.
+The important questions in AgriTrace are about **connections between records**, not only the values stored on a single tree.
 
-Examples:
+Examples include:
 
-- Which other agarwood trees have inspections showing the same symptom?
-- Which nearby agarwood trees also received the same treatment?
-- Which cases are related through more than one signal?
-- Did the same worker record the same symptom in different grids?
-- Which treatment relationships led to improved, stable, or declined outcomes?
+- Which other agarwood trees show the same symptom?
+- Which nearby trees received the same treatment?
+- Which cases are linked through more than one type of evidence?
+- Did the same field worker record the same symptom in another growing area?
+- Which treatment relationships resulted in improved, stable, or declined outcomes?
 
-A relational design can represent all of this, but the application would need several tables and join tables, then increasingly complex joins or recursive queries as the investigation depth grows. In CognoDB, those connections are first-class relationships and can be traversed directly with Cypher.
+A relational database could represent the same entities, but these investigations would require several joins across tree, inspection, symptom, treatment, worker, and location tables.
 
-AgriTrace also stores facts on relationships themselves. For example, `RECEIVED` carries `appliedAt`, `dosage`, and `outcome`, while `NEAR` carries `distanceMeters`.
+CognoDB stores these connections as first-class relationships, allowing the application to follow the relevant paths directly with Cypher.
+
+Relationship properties are also part of the model. For example:
+
+- `RECEIVED` stores `appliedAt`, `dosage`, and `outcome`
+- `NEAR` stores `distanceMeters`
 
 ## Graph data model
 
@@ -66,39 +79,37 @@ graph LR
   P -->|NEAR| P2[Plant]
 ```
 
-### Node labels
+### Nodes
 
-| Label | Purpose | Example properties |
-| --- | --- | --- |
-| `Company` | Farm or organization | `id`, `name`, `location` |
-| `Grid` | Agricultural section | `id`, `name`, `areaHectares` |
-| `Plant` | Internal graph label representing an agarwood tree | `id`, `code`, `species`, `status`, `plantedAt` |
-| `Observation` | Field inspection | `id`, `observedAt`, `severity`, `healthScore`, `notes` |
-| `Symptom` | Observed health signal | `id`, `name`, `category` |
-| `Treatment` | Intervention | `id`, `name`, `category` |
-| `Worker` | Person who recorded an observation | `id`, `name`, `role` |
+| Label | Represents |
+| --- | --- |
+| `Company` | Farm or plantation |
+| `Grid` | Growing area |
+| `Plant` | Agarwood tree |
+| `Observation` | Field inspection |
+| `Symptom` | Recorded health symptom |
+| `Treatment` | Treatment or intervention |
+| `Worker` | Field worker who recorded an inspection |
 
-### Relationship types
+### Relationships
 
-| Relationship | Meaning | Properties |
-| --- | --- | --- |
-| `OWNS` | Company owns a grid | — |
-| `CONTAINS` | Grid contains a plant | — |
-| `HAS_OBSERVATION` | Plant has an observation | — |
-| `SHOWS` | Observation shows a symptom | — |
-| `RECORDED` | Worker recorded an observation | — |
-| `RECEIVED` | Plant received a treatment | `appliedAt`, `dosage`, `outcome` |
-| `NEAR` | Plant is spatially near another plant | `distanceMeters` |
+| Relationship | Meaning |
+| --- | --- |
+| `OWNS` | A farm owns a growing area |
+| `CONTAINS` | A growing area contains an agarwood tree |
+| `HAS_OBSERVATION` | A tree has an inspection record |
+| `SHOWS` | An inspection shows a symptom |
+| `RECORDED` | A worker recorded an inspection |
+| `RECEIVED` | A tree received a treatment |
+| `NEAR` | Two agarwood trees are spatially near each other |
 
 ## Main graph queries
 
-All application queries are parameterized through the official Neo4j JavaScript driver. User-controlled values are passed as query parameters; Cypher is not built by string concatenation.
+All application queries use parameterized Cypher through the official Neo4j JavaScript driver.
 
-### 1. Multi-hop traversal: plants with the same symptom
+### Multi-hop shared-symptom traversal
 
-This satisfies the required traversal of two hops or more.
-
-Path:
+This traversal finds other trees connected to the selected tree through the same symptom.
 
 ```text
 Plant
@@ -111,8 +122,6 @@ Observation
   ← HAS_OBSERVATION
 Plant
 ```
-
-Cypher:
 
 ```cypher
 MATCH (source:Plant {id: $plantId})
@@ -133,15 +142,11 @@ RETURN
   symptom.name AS symptomName
 ```
 
-This is a four-relationship traversal between the source plant and a related plant.
+This is a four-relationship traversal between the selected tree and a related tree.
 
-### 2. Relationally awkward query: cross-grid worker trace
+### Cross-area worker trace
 
-This query asks:
-
-> Did the same worker record the same symptom in another grid?
-
-Path:
+This query finds cases where the same worker recorded the same symptom in another growing area.
 
 ```text
 Source Grid
@@ -154,8 +159,6 @@ Source Grid
 
 Both observations → same Symptom
 ```
-
-Cypher:
 
 ```cypher
 MATCH (sourceGrid:Grid)-[:CONTAINS]->(source:Plant {id: $plantId})
@@ -176,19 +179,15 @@ ORDER BY observedAt DESC
 LIMIT $limit
 ```
 
-This is the most graph-native investigation query in the project. In a relational schema it would require several joins across grids, plants, observations, workers, symptoms, and association tables, while the graph expresses the path directly.
-
-### 3. Shared treatment traversal
+### Shared treatment traversal
 
 ```cypher
 MATCH (source:Plant {id: $plantId})-[:RECEIVED]->(t:Treatment)<-[:RECEIVED]-(other:Plant)
 ```
 
-This lets AgriTrace rank plants that received the same treatment as another piece of related-case evidence.
+This identifies trees connected through the same treatment.
 
-### 4. Treatment relationship insights
-
-The `RECEIVED` edge stores outcome data, so the application can aggregate improvement/stability/decline directly from the relationship:
+### Treatment outcome aggregation
 
 ```cypher
 MATCH (t:Treatment)<-[r:RECEIVED]-(p:Plant)
@@ -201,261 +200,88 @@ RETURN
   sum(CASE WHEN r.outcome = 'declined' THEN 1 ELSE 0 END) AS declined
 ```
 
-## How related cases are ranked
+This uses properties stored directly on the `RECEIVED` relationship.
 
-AgriTrace combines several graph signals instead of showing every connected node with equal importance.
+## Related-case scoring
 
-- Shared symptom: weight `3`
-- Direct `NEAR` relationship: weight `3`
-- Shared treatment: weight `2`
-- Cross-grid worker trace: weight `4`
+AgriTrace combines several kinds of graph evidence when ranking related trees:
 
-The combined score is converted to a simple strength label:
+- shared symptom: `3`
+- direct `NEAR` relationship: `3`
+- shared treatment: `2`
+- cross-area worker trace: `4`
 
-- `high`: score 7+
-- `moderate`: score 4–6
-- `weak`: score below 4
+The combined score is grouped as:
 
-The related-tree screen explains each reason in plain language so a non-technical user can understand why a tree surfaced.
+- **Strong match:** score 7+
+- **Possible match:** score 4–6
+- **Weak match:** below 4
 
-## Seed dataset
+## Dataset
 
-The included seed script creates realistic deterministic data small enough for the CognoDB free tier while still producing meaningful graph patterns.
-
-Current seed:
+The current dataset contains:
 
 - 2 companies
-- 6 grids
-- 72 agarwood trees across two species
-- 8 workers
+- 6 growing areas
+- 72 agarwood trees across two Aquilaria species
+- 8 field workers
 - 8 symptoms
 - 7 treatments
-- inspections for every tree, with extra follow-up inspections for trees marked Needs attention or Urgent
-- 66 `NEAR` relationships across grid neighbors
+- inspection records for every tree
+- additional follow-up inspections for trees needing attention
+- 66 `NEAR` relationships between neighboring trees
 - treatment relationships with dosage and outcome properties
 
-The seed is repeatable and uses `MERGE` for node/relationship creation.
-
-Running with `--reset` removes only nodes marked with `agriTraceSeed = true`, so it does not delete arbitrary data from the CognoDB instance.
-
-## Live validation snapshot
-
-The project has been tested against a real CognoDB Cloud instance.
-
-```text
-CognoDB connectivity: OK
-Seed complete: 72 plants, 198 outgoing plant relationships.
-CognoDB smoke test: OK
-Plants: 72
-Critical cases: 8
-Related cases for sample investigation: 14
-Cross-grid worker traces: 3
-```
+The graph currently contains 198 outgoing relationships from agarwood tree nodes.
 
 ## Technology stack
 
-- Next.js 16 App Router
+- Next.js 16
 - React 19
 - TypeScript
 - Tailwind CSS 4
 - CognoDB Cloud
 - Official `neo4j-driver`
 - Cypher over Bolt/TLS
-- `@xyflow/react` for graph visualization
-- Zod for environment validation
-- Lucide React icons
-- Vercel for hosting
+- `@xyflow/react`
+- Zod
+- Lucide React
+- Vercel
 
-## Application structure
+## Project structure
 
 ```text
 src/
   app/
-    api/health/          Safe database health endpoint
-    plants/              Plant explorer and plant detail
-    investigate/         Multi-hop graph investigation
-    insights/            Treatment relationship insights
-    page.tsx              Dashboard
+    plants/              Agarwood tree records and details
+    investigate/         Related-tree graph investigation
+    insights/            Treatment relationship results
+    page.tsx              Plantation overview
   components/
     investigation-graph.tsx
+    tree-context-flow.tsx
     site-shell.tsx
-    state-panels.tsx
     status-pill.tsx
   lib/cognodb/
-    driver.ts             Neo4j driver singleton and sessions
-    env.ts                Server-side environment validation
-    errors.ts             Safe database error normalization
-    queries.ts            Parameterized Cypher query catalog
-    service.ts            Application data/query layer
-    seed-data.ts          Deterministic realistic seed data
-    types.ts              Typed domain/result contracts
+    driver.ts
+    queries.ts
+    service.ts
+    seed-data.ts
+    types.ts
 scripts/
-  seed.ts                 Seed/reset graph data
-  health.ts               Secret-safe connectivity test
-  smoke.ts                End-to-end graph smoke test
-  capture.ts              Local screenshot capture helper
-docs/screenshots/         README screenshots
+  seed.ts
+  health.ts
+  smoke.ts
+docs/screenshots/
 ```
 
-## CognoDB Cloud setup
+## Current status
 
-1. Create an account at `https://console.cognodb.com/signup`.
-2. Create a free `c0` instance.
-3. Save the generated password immediately; CognoDB displays it once.
-4. Copy the connection URI, username, and password into a local `.env.local` file.
+AgriTrace is live and connected to CognoDB.
 
-Start from the included example:
-
-```bash
-cp .env.example .env.local
-```
-
-On Windows PowerShell:
-
-```powershell
-Copy-Item .env.example .env.local
-```
-
-Then set:
-
-```env
-COGNODB_URI=bolt+s://your-instance.databases.cognodb.cloud
-COGNODB_USERNAME=cognodb
-COGNODB_PASSWORD=your-password
-```
-
-Never commit `.env.local` or downloaded CognoDB credential files. The repository `.gitignore` excludes `.env`, `.env.*`, `.env/`, and `.env.local`, while allowing `.env.example`.
-
-## Run locally
-
-### Requirements
-
-- Node.js 20+ recommended
-- A running CognoDB Cloud instance
-
-### Install
-
-```bash
-npm install
-```
-
-### Verify database connectivity
-
-```bash
-npm run db:health
-```
-
-Expected output:
-
-```text
-CognoDB connectivity: OK
-```
-
-### Seed the graph
-
-```bash
-npm run seed -- --reset
-```
-
-The reset flag is optional. Without it, the script reuses the existing seeded nodes through `MERGE`.
-
-### Run the smoke test
-
-```bash
-npm run db:smoke
-```
-
-This verifies dashboard data, critical plant retrieval, the related-case investigation, and the cross-grid worker trace.
-
-### Start development
-
-```bash
-npm run dev
-```
-
-Open `http://localhost:3000`.
-
-## Quality checks
-
-```bash
-npm run lint
-npm run typecheck
-npm run build
-```
-
-The current implementation passes all three commands and `npm install` reports no known vulnerabilities at the time of submission preparation.
-
-## Error handling
-
-Database failures are normalized into safe application errors.
-
-The UI includes explicit:
-
-- loading states
-- empty states
-- not-found states
-- database-unreachable states
-
-The health endpoint returns only:
-
-```json
-{ "ok": true, "database": "reachable" }
-```
-
-or a `503` response with `database: "unreachable"`. Connection details and passwords are never returned to the client.
-
-## UX approach
-
-The app intentionally does not open with a raw graph canvas. A non-technical user first sees an agarwood health overview, urgent trees, clear status labels, and plain-language reasons. The visual connection map is optional and secondary.
-
-The graph visualization appears only as an optional **Show connection map** section during **Check Related Trees**. The decision summary, evidence counts, and trees to check first all appear before the map.
-
-This keeps the graph database central to the product without making the database model itself the interface.
-
-## Demo walkthrough
-
-A short reviewer flow:
-
-1. Open **Overview** and see the Urgent and Needs attention counts first.
-2. Open **Agarwood trees** and filter by status or Aquilaria species.
-3. Open a tree and review its plain-language inspection and treatment history.
-4. Click **Check related trees**.
-5. Review the summary and **Trees to check first** before opening any visualization.
-6. Optionally expand **Show connection map** to inspect the underlying paths.
-7. Open **Treatment results** to compare how treated trees responded.
-
-## Submission checklist
-
-- [x] CognoDB used as the persistent database layer
-- [x] Official Neo4j JavaScript driver
-- [x] Labeled nodes and typed relationships
-- [x] Relationship properties
-- [x] Realistic repeatable seed script
-- [x] Parameterized Cypher queries
-- [x] Multi-hop traversal of 2+ hops
-- [x] Relationally awkward graph query
-- [x] Functional non-technical web application
-- [x] Intentional responsive UI
-- [x] Loading, empty, not-found, and database error states
-- [x] Environment-based secrets
-- [x] Graceful database-unreachable handling
-- [x] Graph model diagram
-- [x] Main query explanations
-- [x] UI screenshots
-- [x] Production build validated
-- [ ] Hosted demo URL
-- [ ] Short screen recording
-
-A production Vercel deployment exists at `https://agritrace-xi.vercel.app`, but the hosted-demo checkbox remains open until the CognoDB environment variables are configured in Vercel and the live database flow is re-verified. The short screen recording is the other remaining manual submission artifact.
-
-## Security notes
-
-- No CognoDB URI, username, or password is committed.
-- Server environment parsing lives in `src/lib/cognodb/env.ts`.
-- Database credentials never enter client components.
-- Cypher input values are passed through driver parameters such as `$plantId`, `$limit`, `$query`, and `$status`.
-- Database connection errors are converted to user-safe messages.
-
-## License
-
-This repository was created as a candidate take-home assignment for Wexa AI.
+- CognoDB connectivity verified
+- graph seed loaded successfully
+- multi-hop related-tree query verified
+- cross-area worker trace verified
+- production build deployed on Vercel
+- live database health endpoint verified
