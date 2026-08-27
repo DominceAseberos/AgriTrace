@@ -47,9 +47,11 @@ function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "
   const source = graph.nodes.find((node) => node.emphasis);
   if (!source) return { nodes: [], edges: [] };
 
-  const activeTypes = categoryOrder.filter((type) => filter === "all" || filter === type);
+  const activeTypes = categoryOrder;
+  const isFocused = filter !== "all";
+  const typeOpacity = (type: ConnectionReasonType) => (!isFocused || filter === type ? 1 : 0.16);
   const nodeLookup = new Map(graph.nodes.map((node) => [node.id, node]));
-  const activeEdges = graph.edges.filter((edge) => activeTypes.includes(edge.kind as ConnectionReasonType));
+  const activeEdges = graph.edges;
   const relatedPlantIds = new Set<string>();
 
   for (const edge of activeEdges) {
@@ -118,6 +120,8 @@ function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "
         color: config.color,
         border: `1px solid ${config.border}`,
         boxShadow: "0 6px 16px rgba(15,23,42,.05)",
+        opacity: typeOpacity(type),
+        transition: "opacity 180ms ease",
       },
     });
 
@@ -126,7 +130,7 @@ function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "
       source: source.id,
       target: categoryId,
       markerEnd: { type: MarkerType.ArrowClosed, width: 13, height: 13, color: config.color },
-      style: { stroke: config.color, strokeWidth: 2 },
+      style: { stroke: config.color, strokeWidth: 2, opacity: typeOpacity(type), transition: "opacity 180ms ease" },
     });
 
     const evidenceIds = new Set<string>();
@@ -160,7 +164,7 @@ function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "
             </div>
           ),
         },
-        style: { ...palette, width: 164, borderRadius: 12, padding: 11, boxShadow: "0 5px 14px rgba(15,23,42,.04)" },
+        style: { ...palette, width: 164, borderRadius: 12, padding: 11, boxShadow: "0 5px 14px rgba(15,23,42,.04)", opacity: typeOpacity(type), transition: "opacity 180ms ease" },
       });
 
       edges.push({
@@ -168,7 +172,7 @@ function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "
         source: categoryId,
         target: evidence.id,
         markerEnd: { type: MarkerType.ArrowClosed, width: 11, height: 11, color: config.color },
-        style: { stroke: config.color, strokeWidth: 1.5, opacity: 0.72 },
+        style: { stroke: config.color, strokeWidth: 1.5, opacity: 0.72 * typeOpacity(type), transition: "opacity 180ms ease" },
       });
     });
   }
@@ -207,7 +211,7 @@ function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "
           </div>
         ),
       },
-      style: { width: 184, borderRadius: 14, padding: 12, background: "#ffffff", border: "1px solid #d8e1e7", boxShadow: "0 6px 16px rgba(15,23,42,.05)" },
+      style: { width: 184, borderRadius: 14, padding: 12, background: "#ffffff", border: "1px solid #d8e1e7", boxShadow: "0 6px 16px rgba(15,23,42,.05)", opacity: filter === "all" || reasons.includes(filter) ? 1 : 0.16, transition: "opacity 180ms ease" },
     });
   }
 
@@ -237,10 +241,10 @@ function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "
         source: edgeSource,
         target: target.id,
         label: type === "near" ? "nearby" : undefined,
-        animated: type === "worker-trace",
+        animated: type === "worker-trace" && (filter === "all" || filter === type),
         markerEnd: { type: MarkerType.ArrowClosed, width: 11, height: 11, color: config.color },
-        style: { stroke: config.color, strokeWidth: reasonsForSecondary(target.id, type, primaryTypeByPlant) ? 1.25 : 1.7, opacity: reasonsForSecondary(target.id, type, primaryTypeByPlant) ? 0.48 : 0.82 },
-        labelStyle: { fill: config.color, fontSize: 10, fontWeight: 700 },
+        style: { stroke: config.color, strokeWidth: reasonsForSecondary(target.id, type, primaryTypeByPlant) ? 1.25 : 1.7, opacity: (reasonsForSecondary(target.id, type, primaryTypeByPlant) ? 0.48 : 0.82) * typeOpacity(type), transition: "opacity 180ms ease" },
+        labelStyle: { fill: config.color, fontSize: 10, fontWeight: 700, opacity: typeOpacity(type) },
         labelBgStyle: { fill: "#ffffff", fillOpacity: 0.92 },
         labelBgPadding: [4, 2],
         labelBgBorderRadius: 4,
@@ -326,7 +330,7 @@ export function InvestigationGraph({ graph }: { graph: { nodes: GraphNode[]; edg
           const config = categoryConfig[type];
           const active = filter === type;
           return (
-            <button key={type} type="button" onClick={() => setFilter(type)} style={active ? { background: config.bg, color: config.color, borderColor: config.border } : undefined} className={`rounded-full border px-3 py-2 text-[13px] font-semibold transition ${active ? "" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+            <button key={type} type="button" onClick={() => setFilter(active ? "all" : type)} style={active ? { background: config.bg, color: config.color, borderColor: config.border } : undefined} className={`rounded-full border px-3 py-2 text-[13px] font-semibold transition ${active ? "" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
               {config.label} · {counts[type]}
             </button>
           );

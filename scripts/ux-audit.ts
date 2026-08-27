@@ -100,6 +100,26 @@ async function main() {
       throw new Error(`Graph is not centered enough: x=${graphCenter.xRatio.toFixed(3)}, y=${graphCenter.yRatio.toFixed(3)}`);
     }
 
+    const nodeCountBeforeFocus = await graphPage.locator(".react-flow__node").count();
+    await graphPage.getByRole("button", { name: /Same symptoms/ }).click();
+    await graphPage.waitForTimeout(250);
+    const focusState = await graphPage.evaluate(() => {
+      const nodes = [...document.querySelectorAll(".react-flow__node")];
+      const opacities = nodes.map((node) => Number.parseFloat(getComputedStyle(node).opacity));
+      return {
+        count: nodes.length,
+        dimmed: opacities.filter((opacity) => opacity < 0.5).length,
+        prominent: opacities.filter((opacity) => opacity > 0.9).length,
+      };
+    });
+    if (focusState.count !== nodeCountBeforeFocus) throw new Error("Graph focus mode removed nodes instead of dimming them.");
+    if (focusState.dimmed === 0 || focusState.prominent === 0) throw new Error("Graph focus mode did not create both dimmed and prominent nodes.");
+
+    await graphPage.getByRole("button", { name: /Same symptoms/ }).click();
+    await graphPage.waitForTimeout(250);
+    const dimmedAfterReset = await graphPage.evaluate(() => [...document.querySelectorAll(".react-flow__node")].filter((node) => Number.parseFloat(getComputedStyle(node).opacity) < 0.9).length);
+    if (dimmedAfterReset > 0) throw new Error("Graph focus mode did not restore the full graph when toggled off.");
+
     await browser.close();
     console.log(`UX audit: OK (${routes.length} routes on desktop + mobile; graph centered).`);
   } finally {
