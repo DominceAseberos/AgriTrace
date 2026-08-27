@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Network, Sprout, Stethoscope, TrendingUp } from "lucide-react";
+import { ArrowRight, BarChart3, Network, Sprout, Stethoscope, TrendingUp } from "lucide-react";
 import { DatabaseErrorState, EmptyState } from "@/components/state-panels";
 import { StatusPill } from "@/components/status-pill";
 import { getDashboardData } from "@/lib/cognodb/service";
@@ -15,114 +15,90 @@ export default async function DashboardPage() {
   const investigationTarget = recentCases[0]?.plantId;
   const healthyRate = stats.total ? Math.round((stats.healthy / stats.total) * 100) : 0;
 
+  const metrics = [
+    { label: "Plants observed", value: stats.total, note: "Across all connected grids", icon: Sprout, tone: "bg-[#eaf3e5] text-[#4f7a47]" },
+    { label: "Healthy plants", value: stats.healthy, note: `${healthyRate}% of monitored plants`, icon: TrendingUp, tone: "bg-[#e6f4ee] text-emerald-700" },
+    { label: "Needs watching", value: stats.watch, note: "Active follow-up cases", icon: Stethoscope, tone: "bg-[#fff4dc] text-amber-700" },
+    { label: "Critical cases", value: stats.critical, note: "Priority investigations", icon: Network, tone: "bg-[#fdeaea] text-red-700" },
+  ];
+
   return (
-    <div className="space-y-10 lg:space-y-14">
-      <section className="grid gap-10 border-b border-black/10 pb-10 lg:grid-cols-[1.4fr_0.6fr] lg:items-end lg:pb-14">
-        <div className="reveal">
-          <p className="eyebrow mb-5">Graph-based plant health investigation</p>
-          <h1 className="display max-w-5xl">Find the <span className="text-[var(--moss)]">connection</span> before it becomes a pattern.</h1>
-          <p className="mt-7 max-w-2xl text-base leading-7 text-black/55 sm:text-lg">
-            AgriTrace follows symptoms, treatments, proximity, workers and grids as connected evidence—so a supervisor can see why two plant cases may be related.
-          </p>
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-medium text-slate-400">Overview / Plant health</p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-[-0.035em] text-slate-900">Plant health dashboard</h2>
+          <p className="mt-1 text-sm text-slate-500">Monitor field signals and trace relationships across the agricultural graph.</p>
         </div>
+        {investigationTarget && (
+          <Link href={`/investigate/${investigationTarget}`} className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#214b32] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#183a26]">
+            <Network className="size-4" /> Start investigation
+          </Link>
+        )}
+      </div>
 
-        <div className="lg:pb-2">
-          <p className="eyebrow">Start an investigation</p>
-          <p className="mt-3 text-sm leading-6 text-black/55">Open a recent affected plant and trace its multi-hop relationships across the farm graph.</p>
-          {investigationTarget ? (
-            <Link href={`/investigate/${investigationTarget}`} className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--forest)] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5">
-              Trace related cases <ArrowUpRight className="size-4" />
-            </Link>
-          ) : (
-            <Link href="/plants" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--forest)] px-5 py-3 text-sm font-semibold text-white">Browse plants <ArrowUpRight className="size-4" /></Link>
-          )}
-        </div>
-      </section>
-
-      <section className="metric-rule grid overflow-hidden rounded-[30px] bg-white/48 md:grid-cols-4">
-        {[
-          { label: "Plants observed", value: stats.total, note: "Across connected grids", icon: Sprout },
-          { label: "Healthy", value: stats.healthy, note: `${healthyRate}% of monitored plants`, icon: TrendingUp },
-          { label: "Needs watching", value: stats.watch, note: "Active follow-up cases", icon: Stethoscope },
-          { label: "Critical", value: stats.critical, note: "Prioritize investigation", icon: Network },
-        ].map((metric) => {
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
-            <div key={metric.label} className="px-6 py-7 lg:px-8 lg:py-9">
-              <div className="flex items-center justify-between text-black/40"><span className="eyebrow !tracking-[0.12em]">{metric.label}</span><Icon className="size-4" strokeWidth={1.6} /></div>
-              <div className="mt-5 text-5xl font-semibold tracking-[-0.06em]">{metric.value}</div>
-              <p className="mt-2 text-xs text-black/45">{metric.note}</p>
+            <div key={metric.label} className="info-box flex items-center gap-4 p-4">
+              <span className={`grid size-12 shrink-0 place-items-center rounded-xl ${metric.tone}`}><Icon className="size-5" /></span>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-slate-500">{metric.label}</p>
+                <p className="mt-0.5 text-2xl font-semibold tracking-[-0.035em] text-slate-900">{metric.value}</p>
+                <p className="mt-0.5 truncate text-[11px] text-slate-400">{metric.note}</p>
+              </div>
             </div>
           );
         })}
       </section>
 
-      <section className="grid gap-8 xl:grid-cols-[1.35fr_0.65fr]">
-        <div>
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <div>
-              <p className="eyebrow">Recent field signals</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-[-0.045em]">Cases worth tracing</h2>
-            </div>
-            <Link href="/plants" className="text-sm font-semibold text-[var(--forest)]">View all plants</Link>
+      <section className="grid gap-5 xl:grid-cols-[1.45fr_0.55fr]">
+        <div className="admin-card overflow-hidden">
+          <div className="admin-card-header">
+            <div><h3 className="text-sm font-semibold text-slate-800">Recent field signals</h3><p className="mt-0.5 text-xs text-slate-400">Watch and critical observations</p></div>
+            <Link href="/plants" className="text-xs font-semibold text-[#4e7747] hover:underline">View all plants</Link>
           </div>
-
-          {recentCases.length === 0 ? <EmptyState title="No active cases" message="There are no watch or critical plant observations in the graph." /> : (
-            <div className="divide-y divide-black/8 rounded-[28px] bg-white/45 px-5 sm:px-7">
-              {recentCases.map((item) => (
-                <Link key={`${item.plantId}-${item.observedAt}`} href={`/plants/${item.plantId}`} className="group grid gap-3 py-5 transition sm:grid-cols-[0.72fr_1fr_1.5fr_auto] sm:items-center">
-                  <div>
-                    <div className="text-base font-semibold tracking-[-0.02em]">{item.plantCode}</div>
-                    <div className="mt-1 text-xs text-black/45">{item.gridName}</div>
-                  </div>
-                  <div><StatusPill status={item.status} /></div>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-black/70">{item.symptoms.join(" · ") || "No symptom tag"}</p>
-                    <p className="mt-1 text-xs text-black/40">{formatDate(item.observedAt)}</p>
-                  </div>
-                  <ArrowUpRight className="hidden size-4 text-black/30 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-black sm:block" />
-                </Link>
-              ))}
+          {recentCases.length === 0 ? <div className="p-5"><EmptyState title="No active cases" message="There are no watch or critical plant observations in the graph." /></div> : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[700px] text-left text-sm">
+                <thead className="bg-slate-50 text-[10px] uppercase tracking-[0.09em] text-slate-400"><tr><th className="px-5 py-3 font-semibold">Plant</th><th className="px-5 py-3 font-semibold">Health</th><th className="px-5 py-3 font-semibold">Grid</th><th className="px-5 py-3 font-semibold">Signals</th><th className="px-5 py-3 font-semibold">Observed</th><th /></tr></thead>
+                <tbody className="divide-y divide-slate-100">
+                  {recentCases.map((item) => (
+                    <tr key={`${item.plantId}-${item.observedAt}`} className="transition hover:bg-slate-50/80">
+                      <td className="px-5 py-3.5"><Link href={`/plants/${item.plantId}`} className="font-semibold text-slate-800 hover:text-[#315b36]">{item.plantCode}</Link></td>
+                      <td className="px-5 py-3.5"><StatusPill status={item.status} /></td>
+                      <td className="px-5 py-3.5 text-slate-600">{item.gridName}</td>
+                      <td className="max-w-[240px] truncate px-5 py-3.5 text-slate-500">{item.symptoms.join(" · ") || "No symptom tag"}</td>
+                      <td className="px-5 py-3.5 text-xs text-slate-400">{formatDate(item.observedAt)}</td>
+                      <td className="px-5 py-3.5"><Link href={`/plants/${item.plantId}`} aria-label={`Open ${item.plantCode}`}><ArrowRight className="size-4 text-slate-300" /></Link></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
 
-        <div className="rounded-[30px] bg-[var(--forest)] p-7 text-[var(--paper)] sm:p-8">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">Symptom network</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-[-0.045em]">What is clustering?</h2>
-          <p className="mt-3 text-sm leading-6 text-white/55">Distinct plants connected to each symptom through observation nodes.</p>
-          <div className="mt-8 space-y-5">
-            {topSymptoms.map((symptom, index) => {
+        <div className="admin-card overflow-hidden">
+          <div className="admin-card-header"><div><h3 className="text-sm font-semibold text-slate-800">Symptom network</h3><p className="mt-0.5 text-xs text-slate-400">Distinct connected plants</p></div><BarChart3 className="size-4 text-slate-400" /></div>
+          <div className="space-y-5 p-5">
+            {topSymptoms.map((symptom) => {
               const max = topSymptoms[0]?.affectedPlants || 1;
-              const width = Math.max(12, Math.round((symptom.affectedPlants / max) * 100));
-              return (
-                <div key={symptom.name}>
-                  <div className="mb-2 flex items-center justify-between text-sm"><span className="font-medium">{symptom.name}</span><span className="text-white/50">{symptom.affectedPlants}</span></div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-[var(--lime)]" style={{ width: `${width}%`, opacity: 1 - index * 0.08 }} /></div>
-                </div>
-              );
+              const width = Math.max(8, Math.round((symptom.affectedPlants / max) * 100));
+              return <div key={symptom.name}><div className="mb-2 flex justify-between gap-3 text-xs"><span className="font-medium text-slate-600">{symptom.name}</span><span className="font-semibold text-slate-500">{symptom.affectedPlants}</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#719866]" style={{ width: `${width}%` }} /></div></div>;
             })}
           </div>
         </div>
       </section>
 
-      <section className="grid gap-8 border-t border-black/10 pt-9 lg:grid-cols-[0.7fr_1.3fr]">
-        <div>
-          <p className="eyebrow">Relationship properties</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em]">Treatment outcomes live on the edges.</h2>
-          <p className="mt-4 max-w-md text-sm leading-7 text-black/55">The RECEIVED relationship stores when a treatment was applied, dosage and outcome. That means the connection itself carries evidence—not just the plant and treatment nodes.</p>
-          <Link href="/insights" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--forest)]">Explore treatment insights <ArrowUpRight className="size-4" /></Link>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+      <section className="admin-card overflow-hidden">
+        <div className="admin-card-header"><div><h3 className="text-sm font-semibold text-slate-800">Treatment relationship outcomes</h3><p className="mt-0.5 text-xs text-slate-400">Properties stored on RECEIVED edges</p></div><Link href="/insights" className="text-xs font-semibold text-[#4e7747] hover:underline">Open insights</Link></div>
+        <div className="grid gap-px bg-slate-100 sm:grid-cols-2 xl:grid-cols-4">
           {treatmentInsights.slice(0, 4).map((item) => (
-            <div key={item.id} className="soft-panel rounded-[24px] p-5">
-              <div className="flex items-start justify-between gap-3"><h3 className="font-semibold tracking-[-0.02em]">{item.name}</h3><span className="text-2xl font-semibold tracking-[-0.05em]">{item.improvementRate}%</span></div>
-              <p className="mt-1 text-xs text-black/45">improved outcomes · {item.cases} treated plants</p>
-              <div className="mt-5 flex gap-1.5">
-                <span className="h-1.5 rounded-full bg-emerald-700" style={{ flex: item.improved || 0.25 }} />
-                <span className="h-1.5 rounded-full bg-amber-600/60" style={{ flex: item.stable || 0.25 }} />
-                <span className="h-1.5 rounded-full bg-red-700/60" style={{ flex: item.declined || 0.25 }} />
-              </div>
+            <div key={item.id} className="bg-white p-5">
+              <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-700">{item.name}</p><p className="mt-1 text-xs text-slate-400">{item.cases} treated plants</p></div><span className="text-xl font-semibold text-slate-800">{item.improvementRate}%</span></div>
+              <div className="mt-4 flex h-2 overflow-hidden rounded-full bg-slate-100"><span className="bg-emerald-600" style={{ flex: item.improved || .2 }} /><span className="bg-amber-500" style={{ flex: item.stable || .2 }} /><span className="bg-red-500" style={{ flex: item.declined || .2 }} /></div>
             </div>
           ))}
         </div>

@@ -16,14 +16,14 @@ export default async function InsightsPage() {
   const overallRate = totalCases ? Math.round((totalImproved / totalCases) * 100) : 0;
 
   return (
-    <div className="space-y-9">
-      <header className="grid gap-7 border-b border-black/10 pb-9 lg:grid-cols-[1fr_auto] lg:items-end">
+    <div className="space-y-5">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="eyebrow">Treatment relationship insights</p>
-          <h1 className="mt-3 max-w-5xl text-5xl font-semibold tracking-[-0.055em] sm:text-6xl">The edge carries the outcome.</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-black/55">In AgriTrace, RECEIVED is not just a link. It stores when treatment happened, dosage, and observed outcome—useful evidence that belongs to the relationship itself.</p>
+          <p className="text-xs font-medium text-slate-400">Analysis / Treatments</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-[-0.035em] text-slate-900">Treatment insights</h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-500">Review outcomes stored directly on RECEIVED graph relationships.</p>
         </div>
-        <div className="flex items-center gap-5 rounded-[24px] bg-[var(--forest)] px-6 py-5 text-white">
+        <div className="flex items-center gap-4 rounded-xl bg-[#214b32] px-5 py-3.5 text-white">
           <Activity className="size-5 text-[var(--lime)]" />
           <div><div className="text-3xl font-semibold tracking-[-0.05em]">{overallRate}%</div><p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">improved outcomes</p></div>
         </div>
@@ -32,7 +32,7 @@ export default async function InsightsPage() {
       {insights.length === 0 ? <EmptyState title="No treatment relationships yet" message="Seed or record treatment connections before exploring this view." /> : (
         <section className="grid gap-4 lg:grid-cols-2">
           {insights.map((item) => (
-            <article key={item.id} className="rounded-[28px] bg-white/48 p-6 sm:p-7">
+            <article key={item.id} className="admin-card p-5 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div><p className="eyebrow">RECEIVED → Treatment</p><h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">{item.name}</h2><p className="mt-2 text-xs text-black/42">{item.cases} connected plants</p></div>
                 <div className="text-right"><div className="text-4xl font-semibold tracking-[-0.055em]">{item.improvementRate}%</div><p className="text-[10px] uppercase tracking-[0.12em] text-black/36">improvement rate</p></div>
@@ -54,7 +54,7 @@ export default async function InsightsPage() {
         </section>
       )}
 
-      <section className="grid gap-6 rounded-[30px] bg-black/[0.035] p-7 lg:grid-cols-[auto_1fr] lg:items-center lg:p-9">
+      <section className="admin-card grid gap-5 p-5 lg:grid-cols-[auto_1fr] lg:items-center lg:p-6">
         <span className="grid size-12 place-items-center rounded-full bg-[var(--forest)] text-white"><Network className="size-5" /></span>
         <div><p className="text-lg font-semibold tracking-[-0.025em]">Why this matters in a graph</p><p className="mt-2 max-w-4xl text-sm leading-7 text-black/52">A relational model would typically need a treatment table plus a plant-treatment join table before adding relationship-specific facts. In the graph, RECEIVED is already a first-class typed connection and can carry its own properties directly.</p></div>
       </section>

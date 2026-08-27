@@ -12,8 +12,8 @@ export function DatabaseErrorState({ title = "Plant graph unavailable", message 
         <h1 className="text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">{title}</h1>
         <p className="mx-auto mt-4 max-w-md text-[15px] leading-7 text-black/55">{message}</p>
         <div className="mt-7 flex justify-center gap-3">
-          <Link href="/" className="rounded-full bg-[var(--forest)] px-5 py-2.5 text-sm font-semibold text-white">Try overview</Link>
-          <Link href="/plants" className="rounded-full bg-black/5 px-5 py-2.5 text-sm font-semibold text-black/65">Plants</Link>
+          <Link href="/" className="rounded-lg bg-[#214b32] px-5 py-2.5 text-sm font-semibold text-white">Try overview</Link>
+          <Link href="/plants" className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600">Plants</Link>
         </div>
       </div>
     </section>
@@ -22,7 +22,7 @@ export function DatabaseErrorState({ title = "Plant graph unavailable", message 
 
 export function EmptyState({ title = "Nothing connected yet", message = "No matching plant records were found for this view." }: { title?: string; message?: string }) {
   return (
-    <div className="rounded-[28px] bg-black/[0.035] px-6 py-14 text-center">
+    <div className="admin-card px-6 py-12 text-center">
       <SearchX className="mx-auto size-6 text-black/35" />
       <h2 className="mt-4 text-xl font-semibold tracking-[-0.03em]">{title}</h2>
       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-black/50">{message}</p>

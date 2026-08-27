@@ -24,32 +24,32 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
   const plant = result.data;
 
   return (
-    <div className="space-y-8">
-      <Link href="/plants" className="inline-flex items-center gap-2 text-sm font-semibold text-black/45 transition hover:text-black"><ArrowLeft className="size-4" /> All plants</Link>
+    <div className="space-y-5">
+      <Link href="/plants" className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 transition hover:text-slate-800"><ArrowLeft className="size-4" /> Back to plant records</Link>
 
-      <section className="grid gap-8 border-b border-black/10 pb-9 lg:grid-cols-[1fr_auto] lg:items-end">
+      <section className="admin-card flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="mb-4 flex flex-wrap items-center gap-3"><StatusPill status={plant.status} /><span className="text-xs text-black/38">{plant.gridName} · {plant.companyName}</span></div>
-          <h1 className="text-6xl font-semibold tracking-[-0.065em] sm:text-7xl">{plant.code}</h1>
-          <p className="mt-3 text-base italic text-black/48">{plant.species}</p>
+          <h1 className="text-3xl font-semibold tracking-[-0.045em] text-slate-900">{plant.code}</h1>
+          <p className="mt-1 text-sm italic text-slate-500">{plant.species}</p>
         </div>
-        <Link href={`/investigate/${plant.id}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--forest)] px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5">
+        <Link href={`/investigate/${plant.id}`} className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#214b32] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#183a26]">
           <Network className="size-4" /> Trace related cases <ArrowUpRight className="size-4" />
         </Link>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <div className="soft-panel rounded-[26px] p-6">
+        <div className="info-box p-5">
           <Sprout className="size-5 text-[var(--moss)]" />
           <p className="eyebrow mt-5">Current signals</p>
           <p className="mt-2 text-xl font-semibold tracking-[-0.03em]">{plant.symptoms.length ? plant.symptoms.join(" · ") : "No active symptom tags"}</p>
         </div>
-        <div className="soft-panel rounded-[26px] p-6">
+        <div className="info-box p-5">
           <CalendarDays className="size-5 text-[var(--moss)]" />
           <p className="eyebrow mt-5">Last observed</p>
           <p className="mt-2 text-xl font-semibold tracking-[-0.03em]">{formatDate(plant.latestObservedAt)}</p>
         </div>
-        <div className="soft-panel rounded-[26px] p-6">
+        <div className="info-box p-5">
           <ClipboardCheck className="size-5 text-[var(--moss)]" />
           <p className="eyebrow mt-5">Treatment links</p>
           <p className="mt-2 text-xl font-semibold tracking-[-0.03em]">{plant.treatments.length} recorded</p>
@@ -64,7 +64,7 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
           </div>
           <div className="space-y-3">
             {plant.observations.map((observation, index) => (
-              <article key={observation.id} className="rounded-[26px] bg-white/45 p-6">
+              <article key={observation.id} className="admin-card p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="text-sm font-semibold">{formatDate(observation.observedAt)}</p>
@@ -89,11 +89,11 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
             <h2 className="mt-2 text-3xl font-semibold tracking-[-0.045em]">Treatment history</h2>
           </div>
           {plant.treatments.length === 0 ? (
-            <div className="rounded-[26px] bg-black/[0.035] p-7 text-sm leading-6 text-black/48">No treatment relationship has been recorded for this plant.</div>
+            <div className="admin-card p-5 text-sm leading-6 text-slate-500">No treatment relationship has been recorded for this plant.</div>
           ) : (
             <div className="space-y-3">
               {plant.treatments.map((treatment) => (
-                <article key={`${treatment.id}-${treatment.appliedAt}`} className="rounded-[26px] bg-[var(--forest)] p-6 text-white">
+                <article key={`${treatment.id}-${treatment.appliedAt}`} className="overflow-hidden rounded-xl border border-[#1d432d] bg-[#214b32] p-5 text-white shadow-sm">
                   <div className="flex items-start justify-between gap-3"><div><p className="text-lg font-semibold tracking-[-0.025em]">{treatment.name}</p><p className="mt-1 text-xs text-white/45">{treatment.category} · {formatDate(treatment.appliedAt)}</p></div><span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em]">{treatment.outcome}</span></div>
                   <div className="mt-6 border-t border-white/12 pt-4 text-xs text-white/50">Relationship property · dosage: <span className="text-white/80">{treatment.dosage}</span></div>
                 </article>

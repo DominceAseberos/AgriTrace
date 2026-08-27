@@ -33,22 +33,22 @@ export default async function InvestigationPage({ params }: { params: Promise<{ 
   const { source, relatedCases, workerTraces, graph } = result.data;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link href={`/plants/${source.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-black/45 transition hover:text-black"><ArrowLeft className="size-4" /> Back to {source.code}</Link>
         <div className="flex items-center gap-2 rounded-full bg-black/5 px-3 py-1.5 text-xs text-black/48"><GitBranch className="size-3.5" /> Multi-hop graph investigation</div>
       </div>
 
-      <header className="grid gap-7 border-b border-black/10 pb-8 xl:grid-cols-[1fr_auto] xl:items-end">
+      <header className="admin-card grid gap-5 p-5 sm:p-6 xl:grid-cols-[1fr_auto] xl:items-center">
         <div>
           <p className="eyebrow">Trace related cases</p>
-          <div className="mt-3 flex flex-wrap items-center gap-4"><h1 className="text-5xl font-semibold tracking-[-0.055em] sm:text-6xl">{source.code}</h1><StatusPill status={source.status} /></div>
+          <div className="mt-2 flex flex-wrap items-center gap-3"><h1 className="text-3xl font-semibold tracking-[-0.045em] text-slate-900">{source.code}</h1><StatusPill status={source.status} /></div>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-black/55">The graph follows shared symptoms, proximity, treatment history and cross-grid worker recording paths. Every related plant below includes the reason it was ranked.</p>
         </div>
-        <div className="grid grid-cols-3 gap-5 rounded-[24px] bg-white/48 px-6 py-5 text-center">
-          <div><div className="text-3xl font-semibold tracking-[-0.05em]">{relatedCases.length}</div><p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/38">Related</p></div>
-          <div><div className="text-3xl font-semibold tracking-[-0.05em]">{relatedCases.filter((item) => item.strength === "high").length}</div><p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/38">High</p></div>
-          <div><div className="text-3xl font-semibold tracking-[-0.05em]">{workerTraces.length}</div><p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/38">Worker paths</p></div>
+        <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 text-center">
+          <div className="bg-slate-50 px-5 py-3"><div className="text-2xl font-semibold tracking-[-0.04em]">{relatedCases.length}</div><p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">Related</p></div>
+          <div className="bg-slate-50 px-5 py-3"><div className="text-2xl font-semibold tracking-[-0.04em]">{relatedCases.filter((item) => item.strength === "high").length}</div><p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">High</p></div>
+          <div className="bg-slate-50 px-5 py-3"><div className="text-2xl font-semibold tracking-[-0.04em]">{workerTraces.length}</div><p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">Worker paths</p></div>
         </div>
       </header>
 
@@ -65,7 +65,7 @@ export default async function InvestigationPage({ params }: { params: Promise<{ 
             <div className="mb-4"><p className="eyebrow">Ranked evidence</p><h2 className="mt-2 text-3xl font-semibold tracking-[-0.045em]">Why these cases surfaced</h2></div>
             <div className="max-h-[680px] space-y-3 overflow-y-auto pr-1">
               {relatedCases.map((item, index) => (
-                <article key={item.plant.id} className="rounded-[25px] bg-white/52 p-5">
+                <article key={item.plant.id} className="admin-card p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3"><span className="grid size-8 place-items-center rounded-full bg-black/5 text-xs font-semibold text-black/45">{String(index + 1).padStart(2, "0")}</span><div><Link href={`/plants/${item.plant.id}`} className="font-semibold tracking-[-0.02em] hover:underline">{item.plant.code}</Link><p className="mt-0.5 text-xs text-black/40">{item.plant.gridName}</p></div></div>
                     <div className="text-right"><span className="text-xs font-semibold capitalize text-[var(--forest)]">{item.strength}</span><p className="mt-0.5 text-[10px] text-black/35">score {item.score}</p></div>
@@ -89,7 +89,7 @@ export default async function InvestigationPage({ params }: { params: Promise<{ 
         </section>
       )}
 
-      <section className="border-t border-black/10 pt-9">
+      <section className="admin-card p-5 sm:p-6">
         <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
           <div>
             <p className="eyebrow">Relationally awkward query</p>
@@ -100,7 +100,7 @@ export default async function InvestigationPage({ params }: { params: Promise<{ 
           {workerTraces.length === 0 ? (
             <div className="rounded-[26px] bg-black/[0.035] p-7 text-sm leading-6 text-black/45">No cross-grid worker trace was found for this plant. That is a valid empty graph result.</div>
           ) : (
-            <div className="divide-y divide-black/8 rounded-[28px] bg-white/48 px-5 sm:px-7">
+            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white px-5 sm:px-6">
               {workerTraces.slice(0, 8).map((trace, index) => (
                 <div key={`${trace.targetPlantId}-${trace.workerName}-${index}`} className="grid gap-3 py-5 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
                   <div><p className="text-sm font-semibold">{trace.workerName}</p><p className="mt-1 text-xs text-black/42">same recorder</p></div>

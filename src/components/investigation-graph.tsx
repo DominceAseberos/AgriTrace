@@ -79,8 +79,8 @@ export function InvestigationGraph({ graph }: { graph: { nodes: GraphNode[]; edg
   const edges = useMemo(() => mapEdges(graph.edges), [graph.edges]);
 
   return (
-    <div className="relative h-[620px] overflow-hidden rounded-[30px] bg-[#e9e8df] sm:h-[680px]">
-      <div className="pointer-events-none absolute left-5 top-5 z-10 rounded-full bg-white/75 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/50 backdrop-blur">
+    <div className="relative h-[620px] overflow-hidden rounded-xl border border-slate-200 bg-[#f1f4f2] sm:h-[680px]">
+      <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-lg border border-slate-200 bg-white/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500 backdrop-blur">
         Drag · zoom · inspect paths
       </div>
       <ReactFlow
