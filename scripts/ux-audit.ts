@@ -74,6 +74,33 @@ async function main() {
     await rowPage.waitForURL(/\/plants\/plant-/);
     await rowPage.close();
 
+    const filterPage = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    await filterPage.route("**/api/plants**", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      await route.continue();
+    });
+    await filterPage.goto(`${baseUrl}/plants`, { waitUntil: "networkidle" });
+    await filterPage.evaluate(() => {
+      (window as Window & { __agriTraceLiveFilterMarker?: string }).__agriTraceLiveFilterMarker = "alive";
+    });
+    await filterPage.locator('input[name="q"]').fill("AG-011");
+    await filterPage.getByTestId("tree-results-skeleton").waitFor({ state: "visible" });
+    await filterPage.getByText("1 tree shown", { exact: true }).waitFor();
+    const markerAfterSearch = await filterPage.evaluate(() => (window as Window & { __agriTraceLiveFilterMarker?: string }).__agriTraceLiveFilterMarker);
+    if (markerAfterSearch !== "alive") throw new Error("Tree filtering caused a page reload instead of updating the list in place.");
+    if (!filterPage.url().includes("q=AG-011")) throw new Error("Live tree search did not synchronize the URL.");
+    if (await filterPage.getByRole("button", { name: "Show results" }).count()) throw new Error("Tree filters still require a Show results button.");
+
+    await filterPage.getByRole("button", { name: /Clear/ }).click();
+    await filterPage.getByTestId("tree-results-skeleton").waitFor({ state: "visible" });
+    await filterPage.getByText("72 trees shown", { exact: true }).waitFor();
+    await filterPage.locator('select[name="species"]').selectOption("Aquilaria crassna");
+    await filterPage.getByTestId("tree-results-skeleton").waitFor({ state: "visible" });
+    await filterPage.getByText("24 trees shown", { exact: true }).waitFor();
+    const speciesCells = await filterPage.locator('tbody tr[role="link"] td:nth-child(2)').allTextContents();
+    if (!speciesCells.length || !speciesCells.every((value) => value.includes("Aquilaria crassna"))) throw new Error("Live species filter returned mismatched trees.");
+    await filterPage.close();
+
     const graphPage = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await graphPage.goto(`${baseUrl}/investigate/plant-011`, { waitUntil: "networkidle" });
     await graphPage.getByText("Show connection map", { exact: true }).click();
