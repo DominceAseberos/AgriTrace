@@ -1,4 +1,12 @@
 import type { Record as Neo4jRecord } from "neo4j-driver";
+
+/**
+ * Application data-access/service layer.
+ *
+ * Cypher stays in queries.ts, driver/session concerns stay in driver.ts, and
+ * this module converts Neo4j records into UI-facing types. The investigation
+ * flow also combines several independent graph traversals into ranked evidence.
+ */
 import { withReadSession } from "./driver";
 import { DatabaseUnavailableError } from "./errors";
 import { QUERIES } from "./queries";
@@ -19,6 +27,7 @@ import type {
   WorkerTrace,
 } from "./types";
 
+// Normalize Neo4j Record values at one boundary so React components never depend on driver-specific types.
 const text = (record: Neo4jRecord, key: string): string => String(record.get(key) ?? "");
 const nullableText = (record: Neo4jRecord, key: string): string | null => {
   const value = record.get(key);
@@ -48,6 +57,7 @@ function plantFromRecord(record: Neo4jRecord): PlantSummary {
   };
 }
 
+// Service functions return explicit success/error unions instead of leaking database exceptions into pages.
 async function safely<T>(work: () => Promise<T>): Promise<DataResult<T>> {
   try {
     return { ok: true, data: await work() };
@@ -107,6 +117,10 @@ export async function getDashboardData(): Promise<DataResult<DashboardData>> {
   );
 }
 
+/**
+ * Query the tree catalog using validated parameters. Search, status, and species
+ * are evaluated by CognoDB in QUERIES.listPlants rather than client-side.
+ */
 export async function getPlants(options: { query?: string; status?: string; species?: string; limit?: number } = {}): Promise<DataResult<PlantSummary[]>> {
   return safely(async () =>
     withReadSession(async (session) => {
@@ -180,6 +194,11 @@ function strength(score: number): RelatedCase["strength"] {
   return "weak";
 }
 
+/**
+ * Build one related-tree investigation from four kinds of graph evidence.
+ * The Cypher traversals discover the relationships; this function only merges,
+ * scores, ranks, and shapes those results for the UI.
+ */
 export async function getInvestigation(plantId: string): Promise<DataResult<InvestigationData>> {
   return safely(async () => {
     const source = await readPlantDetail(plantId);
@@ -189,6 +208,7 @@ export async function getInvestigation(plantId: string): Promise<DataResult<Inve
     const allPlants = allPlantsResult.ok ? allPlantsResult.data : [];
     const plantLookup = new Map(allPlants.map((plant) => [plant.id, plant]));
 
+    // Keep each business meaning as a separate query so it is independently readable/testable.
     const { sameSymptomRecords, nearbyRecords, treatmentRecords, traceRecords } = await withReadSession(async (session) => {
       const sameSymptom = await session.run(QUERIES.sameSymptomTraversal, { plantId });
       const nearby = await session.run(QUERIES.nearbyPlants, { plantId });
@@ -202,6 +222,7 @@ export async function getInvestigation(plantId: string): Promise<DataResult<Inve
       };
     });
 
+    // One related tree may be discovered by several traversals; merge those reasons instead of duplicating the tree.
     const related = new Map<string, { plant: PlantSummary; reasons: Map<string, ConnectionReason> }>();
     const ensure = (id: string, fallback?: PlantSummary) => {
       const existing = related.get(id);
@@ -276,6 +297,7 @@ export async function getInvestigation(plantId: string): Promise<DataResult<Inve
       });
     }
 
+    // Evidence weights rank useful follow-up candidates; they are application heuristics, not database-computed confidence.
     const relatedCases: RelatedCase[] = [...related.values()]
       .map(({ plant, reasons }) => {
         const reasonList = [...reasons.values()];
@@ -285,6 +307,7 @@ export async function getInvestigation(plantId: string): Promise<DataResult<Inve
       .sort((a, b) => b.score - a.score || a.plant.code.localeCompare(b.plant.code))
       .slice(0, 14);
 
+    // Produce a small presentation graph from the top matches. React Flow later lays this out; CognoDB remains the source of truth.
     const nodes: GraphNode[] = [{ id: source.id, label: source.code, kind: "plant", meta: source.gridName, emphasis: true }];
     const edges: GraphEdge[] = [];
     const nodeIds = new Set([source.id]);

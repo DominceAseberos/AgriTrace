@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * Presentation-only graph renderer.
+ *
+ * CognoDB + Cypher discover the relationships in the service layer. This file
+ * does not infer graph relationships; it arranges the returned nodes/edges into
+ * a readable radial view and provides category focus interactions.
+ */
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Background,
@@ -43,10 +51,12 @@ function getPlantReasons(edges: GraphEdge[], sourceId: string, plantId: string):
   return categoryOrder.filter((type) => reasons.has(type));
 }
 
+/** Convert the service graph into React Flow nodes while preserving the complete network during focus mode. */
 function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "all" | ConnectionReasonType): { nodes: Node[]; edges: Edge[] } {
   const source = graph.nodes.find((node) => node.emphasis);
   if (!source) return { nodes: [], edges: [] };
 
+  // Focus mode never removes data: unrelated branches are dimmed so users retain network context.
   const activeTypes = categoryOrder;
   const isFocused = filter !== "all";
   const typeOpacity = (type: ConnectionReasonType) => (!isFocused || filter === type ? 1 : 0.16);
@@ -95,6 +105,7 @@ function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "
     primaryTypeByPlant.set(plantId, primary);
   }
 
+  // Relationship categories occupy fixed angles around the selected tree to reduce line crossings.
   for (const type of activeTypes) {
     const config = categoryConfig[type];
     const categoryId = `category:${type}`;
@@ -259,6 +270,7 @@ function reasonsForSecondary(plantId: string, type: ConnectionReasonType, primar
   return primaryTypeByPlant.get(plantId) !== type;
 }
 
+// Re-fit after a collapsed <details> panel opens or the responsive container changes size.
 function GraphCanvas({ nodes, edges }: { nodes: Node[]; edges: Edge[] }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { fitView } = useReactFlow();

@@ -4,6 +4,7 @@ import { buildSeedData } from "../src/lib/cognodb/seed-data";
 
 config({ path: ".env.local" });
 
+// Unique IDs make repeated MERGE operations deterministic and protect graph identity.
 const schemaStatements = [
   "CREATE CONSTRAINT company_id IF NOT EXISTS FOR (n:Company) REQUIRE n.id IS UNIQUE",
   "CREATE CONSTRAINT grid_id IF NOT EXISTS FOR (n:Grid) REQUIRE n.id IS UNIQUE",
@@ -20,6 +21,7 @@ async function seed() {
   const session = driver.session();
 
   try {
+    // Reset only data marked as AgriTrace seed content; do not indiscriminately delete unrelated database nodes.
     if (process.argv.includes("--reset")) {
       await session.run("MATCH (n) WHERE n.agriTraceSeed = true DETACH DELETE n");
       console.log("Reset previous AgriTrace seed nodes.");
@@ -34,6 +36,7 @@ async function seed() {
       }
     }
 
+    // Seed nodes and relationships in one write transaction. MERGE makes the import idempotent for stable IDs.
     await session.executeWrite(async (tx) => {
       await tx.run("UNWIND $rows AS row MERGE (n:Company {id: row.id}) SET n += row", { rows: data.companies });
       await tx.run("UNWIND $rows AS row MERGE (n:Grid {id: row.id}) SET n += row", { rows: data.grids });

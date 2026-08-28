@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * Interactive tree catalog.
+ *
+ * The server renders the initial dataset, then filter changes fetch /api/plants
+ * without navigating the page. Only the results region shows a skeleton while
+ * CognoDB is queried. Search is debounced; select filters update immediately.
+ */
+
 import Link from "next/link";
 import { ArrowUpRight, Filter, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -135,6 +143,7 @@ export function TreeBrowser({ initialPlants, initialFilters }: Props) {
   }, []);
 
   const load = (filters: FilterState, delay = 0) => {
+    // Cancel stale debounce timers and in-flight requests so fast typing cannot overwrite newer results.
     if (timerRef.current) window.clearTimeout(timerRef.current);
     requestRef.current?.abort();
     setLoading(true);
@@ -147,6 +156,7 @@ export function TreeBrowser({ initialPlants, initialFilters }: Props) {
 
     const queryString = params.toString();
     const pageUrl = queryString ? `/plants?${queryString}` : "/plants";
+    // Preserve shareable filter URLs without triggering a Next.js navigation or full-page refresh.
     window.history.replaceState(window.history.state, "", pageUrl);
 
     timerRef.current = window.setTimeout(async () => {

@@ -3,6 +3,10 @@ import { getPlants } from "@/lib/cognodb/service";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Lightweight read endpoint used by the live catalog filters. It deliberately
+ * disables caching because every response reflects the current CognoDB state.
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q") ?? "";

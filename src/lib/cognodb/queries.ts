@@ -1,3 +1,11 @@
+/**
+ * Central Cypher catalog.
+ *
+ * Runtime values are always passed separately to session.run() as parameters
+ * such as $plantId, $query, and $limit. Keeping user input out of the Cypher
+ * string avoids string-concatenated queries and satisfies the assignment's
+ * parameterization requirement.
+ */
 export const QUERIES = {
   dashboardStats: `
     MATCH (p:Plant)
@@ -44,6 +52,7 @@ export const QUERIES = {
     LIMIT $limit
   `,
 
+  // Search/filtering happens inside CognoDB; the browser does not filter a downloaded full dataset.
   listPlants: `
     MATCH (c:Company)-[:OWNS]->(g:Grid)-[:CONTAINS]->(p:Plant)
     OPTIONAL MATCH (p)-[:HAS_OBSERVATION]->(o:Observation)
@@ -116,6 +125,11 @@ export const QUERIES = {
     ORDER BY r.appliedAt DESC
   `,
 
+  /**
+   * Multi-hop traversal:
+   * Plant -> Observation -> Symptom <- Observation <- Plant.
+   * This discovers trees related indirectly through a shared symptom node.
+   */
   sameSymptomTraversal: `
     MATCH (source:Plant {id: $plantId})
       -[:HAS_OBSERVATION]->(:Observation)
@@ -135,6 +149,7 @@ export const QUERIES = {
       symptom.name AS symptomName
   `,
 
+  // Direct graph relationship used as geographic/proximity evidence.
   nearbyPlants: `
     MATCH (source:Plant {id: $plantId})-[:NEAR]-(other:Plant)
     MATCH (company:Company)-[:OWNS]->(grid:Grid)-[:CONTAINS]->(other)
@@ -152,6 +167,7 @@ export const QUERIES = {
       symptoms
   `,
 
+  // Finds two trees connected to the same Treatment node.
   sharedTreatments: `
     MATCH (source:Plant {id: $plantId})-[:RECEIVED]->(t:Treatment)<-[:RECEIVED]-(other:Plant)
     MATCH (company:Company)-[:OWNS]->(grid:Grid)-[:CONTAINS]->(other)
@@ -172,6 +188,12 @@ export const QUERIES = {
       t.name AS treatmentName
   `,
 
+  /**
+   * Relationally awkward traversal used to demonstrate graph value:
+   * source grid -> source tree -> observation <- worker -> other observation
+   * <- other tree <- other grid, while both observations point to the same
+   * Symptom. It intentionally requires the other tree to be in another grid.
+   */
   crossGridWorkerTrace: `
     MATCH (sourceGrid:Grid)-[:CONTAINS]->(source:Plant {id: $plantId})
     MATCH (source)-[:HAS_OBSERVATION]->(sourceObs:Observation)<-[:RECORDED]-(worker:Worker)
