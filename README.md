@@ -4,8 +4,9 @@
 
 It focuses on agarwood plantations containing `Aquilaria malaccensis` and `Aquilaria crassna` trees. The application connects tree records with inspections, symptoms, treatments, field workers, growing areas, and farms so related health cases can be investigated as connected evidence rather than isolated records.
 
-**Live demo:** https://agritrace-xi.vercel.app
-**Repository:** https://github.com/DominceAseberos/AgriTrace
+**Live demo:** https://agritrace-xi.vercel.app  
+**Repository:** https://github.com/DominceAseberos/AgriTrace  
+**Screen recording:** https://drive.google.com/file/d/1rsi9UbkBIeO_21oRgrQ8s3Z4X2VYm0Jn/view?usp=sharing
 
 ## What AgriTrace does
 
