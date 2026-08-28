@@ -1,12 +1,9 @@
 "use client";
 
-/**
- * Presentation-only graph renderer.
- *
- * CognoDB + Cypher discover the relationships in the service layer. This file
- * does not infer graph relationships; it arranges the returned nodes/edges into
- * a readable radial view and provides category focus interactions.
- */
+// WHAT: Renders the relationship data returned by the CognoDB service layer.
+// HOW: Arranges provided nodes/edges into a radial React Flow visualization.
+// DO: Treat this file as presentation and interaction logic only.
+// DON'T: Infer or create new domain relationships here; CognoDB/Cypher owns that truth.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -51,12 +48,18 @@ function getPlantReasons(edges: GraphEdge[], sourceId: string, plantId: string):
   return categoryOrder.filter((type) => reasons.has(type));
 }
 
-/** Convert the service graph into React Flow nodes while preserving the complete network during focus mode. */
+// WHAT: Converts service graph data into React Flow nodes and edges.
+// HOW: Adds category hubs, radial positions, labels, colors, and focus opacity.
+// DO: Preserve the full graph while focusing categories.
+// DON'T: Delete unrelated graph branches when a filter is selected.
 function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "all" | ConnectionReasonType): { nodes: Node[]; edges: Edge[] } {
   const source = graph.nodes.find((node) => node.emphasis);
   if (!source) return { nodes: [], edges: [] };
 
-  // Focus mode never removes data: unrelated branches are dimmed so users retain network context.
+  // WHAT: Keeps context when a category is selected.
+  // HOW: Unselected relationship types stay rendered at low opacity.
+  // DO: Dim unrelated branches.
+  // DON'T: Change the graph shape or node count just because a filter is active.
   const activeTypes = categoryOrder;
   const isFocused = filter !== "all";
   const typeOpacity = (type: ConnectionReasonType) => (!isFocused || filter === type ? 1 : 0.16);
@@ -105,7 +108,10 @@ function buildGraph(graph: { nodes: GraphNode[]; edges: GraphEdge[] }, filter: "
     primaryTypeByPlant.set(plantId, primary);
   }
 
-  // Relationship categories occupy fixed angles around the selected tree to reduce line crossings.
+  // WHAT: Organizes the one graph into readable relationship regions.
+  // HOW: Gives symptoms/worker/near/treatment fixed angles around the selected tree.
+  // DO: Keep categories visually separated enough to follow edges.
+  // DON'T: Turn the map into four independent graphs.
   for (const type of activeTypes) {
     const config = categoryConfig[type];
     const categoryId = `category:${type}`;
@@ -270,7 +276,10 @@ function reasonsForSecondary(plantId: string, type: ConnectionReasonType, primar
   return primaryTypeByPlant.get(plantId) !== type;
 }
 
-// Re-fit after a collapsed <details> panel opens or the responsive container changes size.
+// WHAT: Keeps the graph centered when its container appears or resizes.
+// HOW: Observes container size changes and calls React Flow fitView.
+// DO: Refit only when the container has a real visible size.
+// DON'T: Fit the graph while the container is effectively collapsed.
 function GraphCanvas({ nodes, edges }: { nodes: Node[]; edges: Edge[] }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { fitView } = useReactFlow();

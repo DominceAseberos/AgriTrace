@@ -1,10 +1,9 @@
 import neo4j, { type Driver, type Session } from "neo4j-driver";
 
-/**
- * CognoDB speaks Neo4j's Bolt protocol, so AgriTrace uses the official
- * neo4j-driver directly. This module owns connection reuse, session lifetime,
- * access mode, and conversion of low-level driver errors into safe app errors.
- */
+// WHAT: Owns the CognoDB connection and database session lifecycle.
+// HOW: Uses the official Neo4j driver because CognoDB speaks openCypher over Bolt.
+// DO: Reuse the driver and keep read/write sessions short-lived and closed in finally.
+// DON'T: Create a new driver per request or expose raw database errors to the UI.
 import { getCognoDbEnv } from "./env";
 import { toSafeDatabaseError } from "./errors";
 
@@ -12,7 +11,10 @@ const globalForDriver = globalThis as typeof globalThis & {
   __agriTraceDriver?: Driver;
 };
 
-/** Reuse one driver per server process instead of opening a pool per request. */
+// WHAT: Returns the shared database driver.
+// HOW: Caches one driver on globalThis so hot reloads/server requests reuse the pool.
+// DO: Keep credentials in environment variables and connection limits conservative.
+// DON'T: Instantiate a new connection pool for every request.
 export function getDriver(): Driver {
   if (!globalForDriver.__agriTraceDriver) {
     const { uri, username, password } = getCognoDbEnv();
@@ -31,7 +33,10 @@ export function getDriver(): Driver {
   return globalForDriver.__agriTraceDriver;
 }
 
-/** Run read-only work and always close the short-lived session afterward. */
+// WHAT: Runs a read-only CognoDB operation.
+// HOW: Opens a READ session, executes the callback, converts errors, then closes it.
+// DO: Use this for dashboard, search, details, and graph traversal queries.
+// DON'T: Use it for CREATE/MERGE/SET mutation flows.
 export async function withReadSession<T>(work: (session: Session) => Promise<T>): Promise<T> {
   const session = getDriver().session({ defaultAccessMode: neo4j.session.READ });
   try {
@@ -43,11 +48,10 @@ export async function withReadSession<T>(work: (session: Session) => Promise<T>)
   }
 }
 
-/**
- * Write-session boundary reserved for mutation flows such as future live field
- * observations. The current take-home app mainly reads; the seed script proves
- * the same driver can write graph nodes and relationships transactionally.
- */
+// WHAT: Runs database mutations when AgriTrace needs to create/update graph data.
+// HOW: Opens a WRITE session with the same shared driver.
+// DO: Use transactions for related node + relationship writes.
+// DON'T: Split one logical write across unrelated sessions when atomicity matters.
 export async function withWriteSession<T>(work: (session: Session) => Promise<T>): Promise<T> {
   const session = getDriver().session({ defaultAccessMode: neo4j.session.WRITE });
   try {
@@ -59,7 +63,10 @@ export async function withWriteSession<T>(work: (session: Session) => Promise<T>
   }
 }
 
-/** Check both Bolt connectivity and a minimal parameterized Cypher round-trip. */
+// WHAT: Verifies that CognoDB is reachable and can execute Cypher.
+// HOW: Checks Bolt connectivity, then runs a tiny parameterized RETURN query.
+// DO: Return a safe health result to the app.
+// DON'T: Return credentials, driver internals, or raw provider errors.
 export async function verifyDatabase(): Promise<{ ok: true } | { ok: false; message: string }> {
   try {
     const driver = getDriver();

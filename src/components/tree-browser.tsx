@@ -1,12 +1,9 @@
 "use client";
 
-/**
- * Interactive tree catalog.
- *
- * The server renders the initial dataset, then filter changes fetch /api/plants
- * without navigating the page. Only the results region shows a skeleton while
- * CognoDB is queried. Search is debounced; select filters update immediately.
- */
+// WHAT: Displays and live-filters the agarwood tree catalog.
+// HOW: Fetches /api/plants after filter changes and replaces only the result area.
+// DO: Debounce text search, update selects immediately, and show result skeletons.
+// DON'T: Reload the whole page or filter a stale full dataset only in the browser.
 
 import Link from "next/link";
 import { ArrowUpRight, Filter, Search, X } from "lucide-react";
@@ -143,7 +140,10 @@ export function TreeBrowser({ initialPlants, initialFilters }: Props) {
   }, []);
 
   const load = (filters: FilterState, delay = 0) => {
-    // Cancel stale debounce timers and in-flight requests so fast typing cannot overwrite newer results.
+    // WHAT: Prevents old searches from overwriting newer user input.
+    // HOW: Cancels the previous debounce timer and aborts the previous fetch.
+    // DO: Keep only the latest request authoritative.
+    // DON'T: Allow slower stale responses to replace newer results.
     if (timerRef.current) window.clearTimeout(timerRef.current);
     requestRef.current?.abort();
     setLoading(true);
@@ -156,7 +156,10 @@ export function TreeBrowser({ initialPlants, initialFilters }: Props) {
 
     const queryString = params.toString();
     const pageUrl = queryString ? `/plants?${queryString}` : "/plants";
-    // Preserve shareable filter URLs without triggering a Next.js navigation or full-page refresh.
+    // WHAT: Keeps filters visible in the URL without navigating the page.
+    // HOW: Uses history.replaceState instead of router navigation.
+    // DO: Preserve shareable URLs while keeping the current page mounted.
+    // DON'T: Trigger a full route refresh for every keystroke.
     window.history.replaceState(window.history.state, "", pageUrl);
 
     timerRef.current = window.setTimeout(async () => {
